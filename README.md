@@ -84,7 +84,9 @@ var_dump($result);
 ```   
 
 Parameter _$devicename_ __*Gerätename*__ unter der das Broadlink Gerät angelegt wird, Befehle die zum Gleichen gerät gehören sollten den gleichen Gerätenamen nutzten
+
 Parameter _$command_name_ __*Befehlsname*__ unter der der Code abgelegt wird und dann wieder aufgerufen werden kann z.B. Power
+
 Parameter _$InstanceID_ __*ObjektID*__ der Broadlink I/O Instanz
 
 Nachdem die Paramter angepasst wurden auf _Ausführen_ drücken.
@@ -125,8 +127,11 @@ var_dump($iid);
 ```   
 
 Parameter _$devicename_ __*Gerätename*__ unter der das Broadlink Gerät angelegt wird, Befehle die zum Gleichen gerät gehören sollten den gleichen Gerätenamen nutzten
+
 Parameter _$command_name_ __*Befehlsname*__ unter der der Code abgelegt wird und dann wieder aufgerufen werden kann z.B. Power
+
 Parameter _$command_ __*Befehl*__ zu importierender Befehl
+
 Parameter _$InstanceID_ __*ObjektID*__ der Broadlink I/O Instanz
 
 #### 3. Absenden von Gerätebefehlen
@@ -149,6 +154,7 @@ BroadlinkDevice_SendCommand($InstanceID, $command);
 ```   
 
 Parameter _$command_ __*Befehl*__ ausführender Befehlname, entspricht dem Namen der beim Anlernen bzw. Import verwendet worden ist
+
 Parameter _$InstanceID_ __*ObjektID*__ der Broadlink Geräte Instanz für die ein Befehl verschickt werden soll
 
 ## 4. Funktionsreferenz
@@ -163,7 +169,9 @@ Broadlink_LearnDeviceCode($InstanceID, $devicename, $command_name);
 ```   
 
 Parameter _$devicename_ __*Gerätename*__ unter der das Broadlink Gerät angelegt wird, Befehle die zum gleichen Gerät gehören sollten den gleichen Gerätenamen nutzten
+
 Parameter _$command_name_ __*Befehlsname*__ unter der der Code abgelegt wird und dann wieder aufgerufen werden kann z.B. Power
+
 Parameter _$InstanceID_ __*ObjektID*__ der Broadlink I/O Instanz
 
 _**Importieren von existierenden Codes**_
@@ -173,8 +181,11 @@ Broadlink_ImportCode($InstanceID, $devicename, $command_name, $command);
 ```   
 
 Parameter _$devicename_ __*Gerätename*__ unter der das Broadlink Gerät angelegt wird, Befehle die zum gleichen Gerät gehören sollten den gleichen Gerätenamen nutzten
+
 Parameter _$command_name_ __*Befehlsname*__ unter der der Code abgelegt wird und dann wieder aufgerufen werden kann z.B. Power
+
 Parameter _$command_ __*Befehl*__ zu importierender Befehl
+
 Parameter _$InstanceID_ __*ObjektID*__ der Broadlink I/O Instanz
 
 
@@ -187,6 +198,7 @@ BroadlinkDevice_SendCommand($InstanceID, $command);
 ```   
 
 Parameter _$command_ __*Befehl*__ ausführender Befehlname, entspricht dem Namen der beim Anlernen bzw. Import verwendet worden ist
+
 Parameter _$InstanceID_ __*ObjektID*__ der Broadlink Geräte Instanz für die ein Befehl verschickt werden soll
 
  
