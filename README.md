@@ -209,12 +209,14 @@ Parameter _$InstanceID_ __*ObjektID*__ der Broadlink Geräte Instanz für die ei
 
 | Eigenschaft       | Typ     | Standardwert | Funktion                                                  |
 | :---------------: | :-----: | :----------: | :-------------------------------------------------------: |
-| name              | string  | 		     | IP Adresse des Homepilot                                  |
-| host              | string  | 		     | IP Adresse des Homepilot                                  |
-| mac               | string  | 		     | IP Adresse des Homepilot                                  |
-| modell            | string  | 		     | IP Adresse des Homepilot                                  |
-| devicetype        | string  | 		     | IP Adresse des Homepilot                                  |
+| name              | string  | 		     | interner Gerätename des Broadlink                         |
+| host              | string  | 		     | IP Adresse des Broadlink                                  |
+| mac               | string  | 		     | MAC Adresse des Broadlink                                 |
+| modell            | string  | 		     | Modell Typ Broadlink                                      |
+| devicetype        | string  | 		     | interne Gerätetyp Bezeichnung Broadlink                   |
 | CategoryID        | integer | 		     | ObjektId der Importkategorie für die Broadlink Geräte     |
+
+Alle Werte werden über _Discover_ ausgelesen und sind _nicht_ vom Nutzer zu ändern um die Kommunikation zu gewährleisten.
 
 ## 6. Anhang
 
