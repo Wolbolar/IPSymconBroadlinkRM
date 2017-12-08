@@ -229,4 +229,18 @@ GUID: `{E58707E8-8E2C-26D4-A7A9-2D6D6D93AB04}`
 
 GUID: `{B5A1F2D9-0530-6130-5933-9D0E916E8F8A}` 
 
+#### Quellen:
+
+Das PHP Modul nutzt die broadlink-device-php Klasse von _tasict_
+
+[tasict/broadlink-device-php](https://github.com/tasict/broadlink-device-php "Tasict")
+
+Das Protokoll basiert auf auf der Analyse von mjg59 (MIT License)
+
+[Broadlink RM2 network protocol](https://github.com/mjg59/python-broadlink/blob/master/protocol.md "mjg59")
+
+
+
+
+
 
