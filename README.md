@@ -61,7 +61,7 @@ Nun unter _I/O Instanzen_ zum _**Broadlink I/O**_ wechseln und mit Doppelklick �
 
 Hier wählen wir zunächst die Kategorie aus die zurvor angelegt wurde und bestätigen mit _Übernehmen_.
 
-![ModulesDiscover1](docs/Discover1.png?raw=true "Kategorie")
+![ModulesDiscover1](docs/BroadlinkIOConfig.png?raw=true "Kategorie")
 
 Anschließend muss nun der Broadlink bereits im Netzwerk in Betrieb genommen worden sein, im WLAN errechnbar sein und am Strom hängen.
 Jetzt kann dann auf _Discover_ gedrückt und kurzen Moment (10 Sekunden) abwarten. Die Instanz sollte dann geschlossen und neu geöffnet werden dann sind die Werte des Broadlink sichtbar, hier muss nichts angepasst werden die Werte bleiben unverändert.
