@@ -67,14 +67,16 @@ class BroadlinkGateway extends IPSModule
         */
     public function LearnDeviceCode(string $devicename, string $command_name)
     {
-        $this->LearnDevice($devicename, $command_name);
+        $result = $this->LearnDevice($devicename, $command_name);
+        return $result;
     }
 
     public function Learn()
     {
         $devicename = $this->ReadPropertyString("devicename");
         $command_name = $this->ReadPropertyString("command");
-        $this->LearnDevice($devicename, $command_name);
+        $result = $this->LearnDevice($devicename, $command_name);
+        return $result;
     }
 
     public function ImportCode($devicename, $command_name, $commandhex)
@@ -150,8 +152,7 @@ class BroadlinkGateway extends IPSModule
         $result = json_encode($json, JSON_NUMERIC_CHECK);
         $this->SendDebug("Broadlink Learn:", $result,0);
         IPS_LogMessage("Broadlink Learn:", $result);
-        // return $result;
-        return $json['hex_number'];
+        return $result;
     }
 
     protected function CreateWFVariable($iid, $deviceident, $command)
