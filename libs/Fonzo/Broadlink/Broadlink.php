@@ -296,8 +296,8 @@ class Broadlink{
 
     protected static function byte($array)
     {
-
-        return implode(array_map("chr", $array));
+        $result = @implode(array_map("chr", $array));
+        return $result;
     }
 
     public static function Discover()

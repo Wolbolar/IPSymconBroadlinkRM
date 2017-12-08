@@ -70,7 +70,7 @@
                 $profilename = "Broadlink.".$deviceident.".Command1";
 			}
             $associations = IPS_GetVariableProfile($profilename)["Associations"];
-            var_dump($associations);
+            $this->SendDebug("Profile Associations:",json_encode($associations),0);
             $command_name = false;
             foreach($associations as $key => $association)
             {

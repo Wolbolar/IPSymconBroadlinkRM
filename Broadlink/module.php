@@ -150,7 +150,8 @@ class BroadlinkGateway extends IPSModule
         $result = json_encode($json, JSON_NUMERIC_CHECK);
         $this->SendDebug("Broadlink Learn:", $result,0);
         IPS_LogMessage("Broadlink Learn:", $result);
-        return $result;
+        // return $result;
+        return $json['hex_number'];
     }
 
     protected function CreateWFVariable($iid, $deviceident, $command)
@@ -158,7 +159,6 @@ class BroadlinkGateway extends IPSModule
         $wfcommandid = $this->CreateVariableByIdent($iid, "WFCommands", "Command", 1);
         $values = json_decode($command, true);
         $valuescount = count($values);
-        //var_dump($valuescount);
         $commandass =  Array();
         $profilecounter = 0;
         foreach ($values as $key => $value)
@@ -168,7 +168,7 @@ class BroadlinkGateway extends IPSModule
         }
         $profilename = "Broadlink.".$deviceident.".Command";
         $this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, ($valuescount-1), 0, 0, 1, $commandass);
-        IPS_SetVariableCustomProfile($wfcommandid, "Broadlink.Command");
+        IPS_SetVariableCustomProfile($wfcommandid, $profilename);
         BroadlinkDevice_EnableWFVariable($iid);
     }
 
@@ -256,7 +256,7 @@ class BroadlinkGateway extends IPSModule
         $host = $response->host;
         $mac = $response->mac;
         $modell = $response->model;
-        $name = str_replace('"', '', $response->name);
+        $name = $response->name;
         $temperature = floatval($response->temperature);
         IPS_SetProperty($this->InstanceID, "name", json_encode($name));
         $this->SendDebug("Broadlink Discover:", "Name ".json_encode($name),0);
