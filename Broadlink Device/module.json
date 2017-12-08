@@ -1,0 +1,11 @@
+{
+	"id": "{B5A1F2D9-0530-6130-5933-9D0E916E8F8A}",
+	"name": "BroadlinkDevice",
+	"type": 3,
+	"vendor": "BroadLink",
+	"aliases": ["Broadlink"],
+	"parentRequirements": ["{EFC61574-A0BC-2FBB-065A-8C6B42FC2646}"],
+	"childRequirements": [],
+	"implemented": ["{A05B41B1-7478-8E54-296E-17F406FD3876}"],
+	"prefix": "BroadlinkDevice"
+}

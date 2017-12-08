@@ -1,0 +1,11 @@
+{
+	"translations": {
+		"de": { 
+			"available commands": "Verfügbare Befehle:",
+			"Broadlink device name": "Broadlink Geräte Name",
+			"configuration valid": "Konfiguration gültig",
+			"Broadlink Device is inactive": "Broadlink Device ist inaktiv",
+			"creating instance": "Die Instanz wird erstellt"
+		}
+	}
+}

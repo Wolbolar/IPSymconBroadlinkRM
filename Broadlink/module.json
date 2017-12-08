@@ -1,0 +1,11 @@
+{
+    "id": "{E58707E8-8E2C-26D4-A7A9-2D6D6D93AB04}",
+    "name": "BroadlinkGateway",
+    "type": 1,
+    "vendor": "BroadLink",
+    "aliases": ["Broadlink I/O"],
+    "parentRequirements": [],
+    "childRequirements": ["{A05B41B1-7478-8E54-296E-17F406FD3876}"],
+    "implemented": ["{EFC61574-A0BC-2FBB-065A-8C6B42FC2646}"],
+    "prefix": "Broadlink"
+}
