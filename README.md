@@ -17,6 +17,7 @@ Modul für IP-Symcon ab Version 4.2 ermöglicht die Kommunikation mit einem Broa
 ## 1. Funktionsumfang
 
 Das Modul kann aus IP-Symcon Befehle an einem Broadlink RM anlernen und Befehle an einen Broadlink RM senden.
+Auslesen der Daten eines Broadlink A1 Sensors.
 
 [BroadlinkRM](http://www.ibroadlink.com/rm/ "Broadlink RM")
 
@@ -63,8 +64,10 @@ Hier wählen wir zunächst die Kategorie aus die zurvor angelegt wurde und best�
 
 ![ModulesDiscover1](docs/BroadlinkIOConfig.png?raw=true "Kategorie")
 
-Anschließend muss nun der Broadlink bereits im Netzwerk in Betrieb genommen worden sein, im WLAN errechnbar sein und am Strom hängen.
+Anschließend muss nun der Broadlink bereits im Netzwerk in Betrieb genommen worden sein, im WLAN erreichbar sein und am Strom hängen.
 Jetzt kann dann auf _Discover_ gedrückt und kurzen Moment (10 Sekunden) abwarten. Die Instanz sollte dann geschlossen und neu geöffnet werden dann sind die Werte des Broadlink sichtbar, hier muss nichts angepasst werden die Werte bleiben unverändert.
+
+Sollte es mehrere Broadlink Gateways im Netzwerk geben werden diese automatisch neu angelegt. Wenn ein Broadlink A1 Sensor vorhanden sein sollte wird dieser auch automatisch neu unterhalb der Broadlink Kategorie angelegt.
 
 #### 2. Anlernen von Geräte Befehlen
 

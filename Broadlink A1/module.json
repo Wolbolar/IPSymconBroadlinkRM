@@ -1,0 +1,11 @@
+{
+    "id": "{1A1402D6-B4BD-F179-444E-9E351075D937}",
+    "name": "BroadlinkA1",
+    "type": 3,
+    "vendor": "BroadLink",
+    "aliases": ["Broadlink A1"],
+    "parentRequirements": ["{EFC61574-A0BC-2FBB-065A-8C6B42FC2646}"],
+    "childRequirements": [],
+    "implemented": ["{D6AB7ABE-1A40-F949-C5B3-64AEAAB179D8}"],
+    "prefix": "BroadlinkA1"
+}

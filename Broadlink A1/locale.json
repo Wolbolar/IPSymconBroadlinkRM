@@ -1,8 +1,9 @@
 {
 	"translations": {
 		"de": { 
-			"Discover Device": "Gateway Daten auslesen",
-			"Discover": "Discover",
+			"This device is created by the Broadlink gateway, please go to the Broadlink gateway and press Discover": "Dieses gerät wird automatisch vom Broadlink I/O angelegt, bitte den Broadlink I/O öffnen und Discover drücken",
+			"Update data": "Daten aktualisieren",
+			"Update": "Aktualisieren",
 			"IP address": "IP Adresse",
 			"MAC address": "MAC Adresse",
 			"Broadlink Name": "Broadlink Name",
@@ -12,20 +13,10 @@
 			"Broadlink Device type": "Broadlink Geräte Typ",
 			"Modell": "Model",
 			"Device type": "Geräte Typ",
-			"Category for Broadlink devices": "Kategorie für Broadlink Geräte",
-			"Category": "Kategorie",
-			"Broadlink Device name etc. TV": "Broadlink Geräte Name z.B. TV",
-			"Device name": "Geräte Name",
-			"Command name etc. On": "Befehlsname z.B. On",
-			"Command name": "Befehlsname",
-			"Learn Command": "Befehl anlernen",
-			"Learn": "Anlernen",
-			"Update inteval A1 Sensor in minutes": "Aktualisierungsintervall des A1 Sensors in Minuten",
-			"minutes": "Minuten",
 			"Creating instance.": "Die Instanz wird erstellt.",
 			"No active Broadlink I/O.":"Kein aktiver Broadlink I/O",
 			"Interface closed.": "Interface geschlossen.",
-			"Broadlink created.": "Broadlink erstellt.",
+			"Broadlink A1 created.": "Broadlink A1 erstellt.",
 			"choose category for Broadlink devices.": "Kategorie für den Broadlink Geräte auswählen."
 		}
 	}
