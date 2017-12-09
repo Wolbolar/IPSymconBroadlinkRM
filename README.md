@@ -25,6 +25,7 @@ Auslesen der Daten eines Broadlink A1 Sensors.
 
  - IPS 4.2
  - Broadlink RM
+ - (optional) Broadlink A1 Sensor wenn Raumdaten genutzt werden sollen
 
 ## 3. Installation
 
@@ -68,6 +69,26 @@ Anschließend muss nun der Broadlink bereits im Netzwerk in Betrieb genommen wor
 Jetzt kann dann auf _Discover_ gedrückt und kurzen Moment (10 Sekunden) abwarten. Die Instanz sollte dann geschlossen und neu geöffnet werden dann sind die Werte des Broadlink sichtbar, hier muss nichts angepasst werden die Werte bleiben unverändert.
 
 Sollte es mehrere Broadlink Gateways im Netzwerk geben werden diese automatisch neu angelegt. Wenn ein Broadlink A1 Sensor vorhanden sein sollte wird dieser auch automatisch neu unterhalb der Broadlink Kategorie angelegt.
+
+##### Broadlink A1
+
+Sollte ein Broadlink A1 beim Discovery gefunden wurden sein, wird dieser automatisch in IP-Symcon mit den passenden Werten angelegt. In der Instanz sind die Werte des Broadlink A1 zu sehen, hier soll nichts verstellt werden, diese Werte sind für die Kommunikation notwendig.
+
+Objektbaum:
+
+![BroadlinkA1Objecttree](docs/broadlink_a1.png?raw=true "Broadlink A1")
+
+Webfront:
+
+![BroadlinkA1WF](docs/broadlink_a1_wf.png?raw=true "Broadlink A1 Webfront")
+
+Ausgelesen werden aus dem Broadlink A1
+
+* Luftfeuchtigkeit
+* Lautstärke
+* Licht
+* Luftqualität
+* Temperatur
 
 #### 2. Anlernen von Geräte Befehlen
 
