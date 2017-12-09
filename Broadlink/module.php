@@ -412,7 +412,7 @@ class BroadlinkGateway extends IPSModule
         SetValue($air_qualityid, $air_quality);
         $this->SendDebug("Broadlink A1:", "Device ".$devicename."(".$iid."): Air quality ".$air_quality,0);
         $noiseid = IPS_GetObjectIDByIdent("Noise", $iid);
-        SetValue($noiseid, $temperature);
+        SetValue($noiseid, $noise);
         $this->SendDebug("Broadlink A1:", "Device ".$devicename."(".$iid."): Noise ".$noise,0);
     }
 
