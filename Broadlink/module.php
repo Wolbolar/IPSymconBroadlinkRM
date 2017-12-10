@@ -330,7 +330,10 @@ class BroadlinkGateway extends IPSModule
         $mac = $device["mac"];
         $model = $device["model"];
         $name = $device["name"];
-        $temperature = floatval($device["temperature"]);
+        if(isset($device["temperature"]))
+        {
+            $temperature = floatval($device["temperature"]);
+        }
         IPS_SetProperty($iid, "name", json_encode($name));
         $this->SendDebug("Broadlink Discover:", "Name ".json_encode($name),0);
         IPS_SetProperty($iid, "host", $host);
