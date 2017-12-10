@@ -43,7 +43,7 @@ class BroadlinkGateway extends IPSModule
 				//Instanz aktiv
 			}
 		$devicetype = $this->ReadPropertyString("devicetype");
-		if($devicetype == "0x2712")
+		if($devicetype == "0x2712" || $devicetype == "0x272a")
         {
             $this->RegisterVariableFloat("Temperature", "Temperatur", "~Temperature");
         }
@@ -276,6 +276,12 @@ class BroadlinkGateway extends IPSModule
                 $obj['temperature'] = $temperature;
                 $this->CheckExistingIdent($obj);
             }
+            if($obj['model'] == "RM Mini")
+            {
+
+                // $device->Auth();
+                $this->CheckExistingIdent($obj);
+            }
             else if($obj['model'] == "A1")
             {
 
@@ -322,7 +328,7 @@ class BroadlinkGateway extends IPSModule
         $type = $device["devtype"];
         $host = $device["host"];
         $mac = $device["mac"];
-        $modell = $device["model"];
+        $model = $device["model"];
         $name = $device["name"];
         $temperature = floatval($device["temperature"]);
         IPS_SetProperty($iid, "name", json_encode($name));
@@ -331,16 +337,19 @@ class BroadlinkGateway extends IPSModule
         $this->SendDebug("Broadlink Discover:", "Host ".$host,0);
         IPS_SetProperty($iid, "mac", $mac);
         $this->SendDebug("Broadlink Discover:", "Mac ".$mac,0);
-        IPS_SetProperty($iid, "modell", $modell);
-        $this->SendDebug("Broadlink Discover:", "Model ".$modell,0);
+        IPS_SetProperty($iid, "modell", $model);
+        $this->SendDebug("Broadlink Discover:", "Model ".$model,0);
         IPS_SetProperty($iid, "devicetype", $type);
         $this->SendDebug("Broadlink Discover:", "Device type ".$type,0);
         IPS_ApplyChanges($iid); //Neue Konfiguration übernehmen
 
-        $temperatureid = $this->CreateVariableByIdent($iid, "Temperature", "Temperatur", 2);
-        $this->SendDebug("Broadlink Discover:", "Temperature ".$temperature,0);
-        IPS_SetVariableCustomProfile($temperatureid, "~Temperature");
-        SetValue($this->GetIDForIdent("Temperature"), $temperature);
+        if($model == "RM2" || $model == "RM2 Pro Plus")
+        {
+            $temperatureid = $this->CreateVariableByIdent($iid, "Temperature", "Temperatur", 2);
+            $this->SendDebug("Broadlink Discover:", "Temperature ".$temperature,0);
+            IPS_SetVariableCustomProfile($temperatureid, "~Temperature");
+            SetValue($this->GetIDForIdent("Temperature"), $temperature);
+        }
     }
 
     protected function CreateNewGateway($device)

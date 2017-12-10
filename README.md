@@ -24,7 +24,7 @@ Auslesen der Daten eines Broadlink A1 Sensors.
 ## 2. Voraussetzungen
 
  - IPS 4.2
- - Broadlink RM
+ - Broadlink RM, RM Mini, RM2 Pro Plus, 
  - (optional) Broadlink A1 Sensor wenn Raumdaten genutzt werden sollen
 
 ## 3. Installation
@@ -61,7 +61,7 @@ Nun unter _I/O Instanzen_ zum _**Broadlink I/O**_ wechseln und mit Doppelklick �
 
 ![ModulesDiscover](docs/Discover.png?raw=true "Discover Kategorie leer")
 
-Hier wählen wir zunächst die Kategorie aus die zurvor angelegt wurde und bestätigen mit _Übernehmen_.
+Hier wählen wir zunächst die Kategorie aus die zuvor angelegt wurde und bestätigen mit _Übernehmen_.
 
 ![ModulesDiscover1](docs/BroadlinkIOConfig.png?raw=true "Kategorie")
 
@@ -107,7 +107,7 @@ var_dump($result);
 ?>
 ```   
 
-Parameter _$devicename_ __*Gerätename*__ unter der das Broadlink Gerät angelegt wird, Befehle die zum Gleichen gerät gehören sollten den gleichen Gerätenamen nutzten
+Parameter _$devicename_ __*Gerätename*__ unter der das Broadlink Gerät angelegt wird, Befehle die zum gleichen Gerät gehören sollten den gleichen Gerätenamen nutzten
 
 Parameter _$command_name_ __*Befehlsname*__ unter der der Code abgelegt wird und dann wieder aufgerufen werden kann z.B. Power
 
@@ -117,7 +117,7 @@ Nachdem die Paramter angepasst wurden auf _Ausführen_ drücken.
 
 ![ModulesRun](docs/run.png?raw=true "Ausführen")
 
-Man sieht am Broadlink RM nun eine orangene LED leuchten, d.h. dieser ist Empfangsbereit.
+Man sieht am Broadlink RM nun eine orangene LED leuchten, d.h. dieser ist empfangsbereit.
 
 In IP-Symcon steht das Ausführen Symbol
 
@@ -150,7 +150,7 @@ var_dump($iid);
 ?>
 ```   
 
-Parameter _$devicename_ __*Gerätename*__ unter der das Broadlink Gerät angelegt wird, Befehle die zum Gleichen gerät gehören sollten den gleichen Gerätenamen nutzten
+Parameter _$devicename_ __*Gerätename*__ unter der das Broadlink Gerät angelegt wird, Befehle die zum gleichen Gerät gehören sollten den gleichen Gerätenamen nutzten
 
 Parameter _$command_name_ __*Befehlsname*__ unter der der Code abgelegt wird und dann wieder aufgerufen werden kann z.B. Power
 
