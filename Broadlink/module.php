@@ -43,7 +43,7 @@ class BroadlinkGateway extends IPSModule
 				//Instanz aktiv
 			}
 		$devicetype = $this->ReadPropertyString("devicetype");
-		if($devicetype == "0x2712" || $devicetype == "0x272a")
+		if($devicetype == "0x2712" || $devicetype == "0x272a" || $devicetype == "0x2787")
         {
             $this->RegisterVariableFloat("Temperature", "Temperatur", "~Temperature");
         }
@@ -268,7 +268,7 @@ class BroadlinkGateway extends IPSModule
             $obj['host'] = $device->host();
             $obj['model'] = $device->model();
 
-            if($obj['model'] == "RM2" || $obj['model'] == "RM2 Pro Plus")
+            if($obj['model'] == "RM2" || $obj['model'] == "RM2 Pro Plus" || $obj['model'] == "RM2 Pro Plus2")
             {
 
                 $device->Auth();
@@ -346,7 +346,7 @@ class BroadlinkGateway extends IPSModule
         $this->SendDebug("Broadlink Discover:", "Device type ".$type,0);
         IPS_ApplyChanges($iid); //Neue Konfiguration übernehmen
 
-        if($model == "RM2" || $model == "RM2 Pro Plus")
+        if($model == "RM2" || $model == "RM2 Pro Plus" || $model == "RM2 Pro Plus2")
         {
             $temperatureid = $this->CreateVariableByIdent($iid, "Temperature", "Temperatur", 2);
             $this->SendDebug("Broadlink Discover:", "Temperature ".$temperature,0);

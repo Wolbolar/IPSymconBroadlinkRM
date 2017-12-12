@@ -24,7 +24,7 @@ Auslesen der Daten eines Broadlink A1 Sensors.
 ## 2. Voraussetzungen
 
  - IPS 4.2
- - Broadlink RM, RM Mini, RM2 Pro Plus, 
+ - Broadlink RM, RM Mini, RM2 Pro Plus, RM2 Pro Plus2
  - (optional) Broadlink A1 Sensor wenn Raumdaten genutzt werden sollen
 
 ## 3. Installation
