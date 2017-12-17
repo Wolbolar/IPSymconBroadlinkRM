@@ -183,20 +183,74 @@ class BroadlinkGateway extends IPSModule
 
     protected function CreateWFVariable($iid, $deviceident, $command)
     {
-        $wfcommandid = $this->CreateVariableByIdent($iid, "WFCommands", "Command", 1);
+        // count commands
         $values = json_decode($command, true);
         $valuescount = count($values);
+        // 32 Limit
+        if($valuescount >32 && $valuescount <= 64)
+        {
+            $profilename = "Broadlink.".$deviceident.".Command1";
+            $profilecounter = 31;
+            $this->CreateBroadlinkWebFrontVariable($iid, "WFCommands1", "Command 1", $values, $profilename, $profilecounter);
+        }
+        elseif($valuescount >64 && $valuescount <= 96)
+        {
+            $profilename = "Broadlink.".$deviceident.".Command2";
+            $profilecounter = 63;
+            $this->CreateBroadlinkWebFrontVariable($iid, "WFCommands2", "Command 2", $values, $profilename, $profilecounter);
+        }
+        elseif($valuescount >96 && $valuescount <= 128)
+        {
+            $profilename = "Broadlink.".$deviceident.".Command3";
+            $profilecounter = 95;
+            $this->CreateBroadlinkWebFrontVariable($iid, "WFCommands3", "Command 3", $values, $profilename, $profilecounter);
+        }
+        elseif($valuescount >128 && $valuescount <= 160)
+        {
+            $profilename = "Broadlink.".$deviceident.".Command4";
+            $profilecounter = 127;
+            $this->CreateBroadlinkWebFrontVariable($iid, "WFCommands4", "Command 4", $values, $profilename, $profilecounter);
+        }
+        elseif($valuescount >160 && $valuescount <= 192)
+        {
+            $profilename = "Broadlink.".$deviceident.".Command5";
+            $profilecounter = 159;
+            $this->CreateBroadlinkWebFrontVariable($iid, "WFCommands5", "Command 5", $values, $profilename, $profilecounter);
+        }
+        elseif($valuescount >192 && $valuescount <= 224)
+        {
+            $profilename = "Broadlink.".$deviceident.".Command6";
+            $profilecounter = 191;
+            $this->CreateBroadlinkWebFrontVariable($iid, "WFCommands6", "Command 6", $values, $profilename, $profilecounter);
+        }
+        else
+        {
+            $profilename = "Broadlink.".$deviceident.".Command";
+            $profilecounter = 0;
+            $this->CreateBroadlinkWebFrontVariable($iid, "WFCommands", "Command", $values, $profilename, $profilecounter);
+        }
+    }
+
+    protected function CreateBroadlinkWebFrontVariable($iid, $ident, $name, $values, $profilename, $profilecounter)
+    {
+        $wfcommandid = $this->CreateVariableByIdent($iid, $ident, $name, 1);
         $commandass =  Array();
-        $profilecounter = 0;
+        $profilelimit = $profilecounter + 31;
+        $i = 0;
         foreach ($values as $key => $value)
         {
-            $commandass[$profilecounter] = Array($profilecounter, $key,  "", -1);
+            $commandass[$profilecounter] = Array($i, $key,  "", -1);
             $profilecounter = $profilecounter + 1;
+            $i++;
+            if($i == $profilelimit)
+            {
+                break;
+            }
         }
-        $profilename = "Broadlink.".$deviceident.".Command";
-        $this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, ($valuescount-1), 0, 0, 1, $commandass);
+        $this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, $i, 0, 0, 1, $commandass);
         IPS_SetVariableCustomProfile($wfcommandid, $profilename);
-        BroadlinkDevice_EnableWFVariable($iid);
+        BroadlinkDevice_EnableWFVariable($iid, $ident);
+        return $wfcommandid;
     }
 
     public function ForwardData($JSONString)
