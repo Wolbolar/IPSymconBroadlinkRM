@@ -456,18 +456,22 @@
             $wfcommandid = $this->CreateVariableByIdent($this->InstanceID, $ident, $name, 1);
             $commandass =  Array();
             $profilelimit = $profilecounter + 31;
+            $profilekey = 0;
             $i = 0;
             foreach ($values as $key => $value)
             {
-                $commandass[$profilecounter] = Array($i, $key,  "", -1);
-                $profilecounter = $profilecounter + 1;
+                if($i >= $profilecounter && $i <= $profilelimit)
+                {
+                    $commandass[$profilekey] = Array($i, $key,  "", -1);
+                    $profilekey = $profilekey + 1;
+                }
                 $i++;
                 if($i == $profilelimit)
                 {
                     break;
                 }
             }
-            $this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, $i, 0, 0, 1, $commandass);
+            $this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, $profilekey, 0, 0, 1, $commandass);
             IPS_SetVariableCustomProfile($wfcommandid, $profilename);
             $this->EnableWFVariable($ident);
             return $wfcommandid;

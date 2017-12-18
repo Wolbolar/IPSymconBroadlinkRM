@@ -236,18 +236,22 @@ class BroadlinkGateway extends IPSModule
         $wfcommandid = $this->CreateVariableByIdent($iid, $ident, $name, 1);
         $commandass =  Array();
         $profilelimit = $profilecounter + 31;
+        $profilekey = 0;
         $i = 0;
         foreach ($values as $key => $value)
         {
-            $commandass[$profilecounter] = Array($i, $key,  "", -1);
-            $profilecounter = $profilecounter + 1;
+            if($i >= $profilecounter && $i <= $profilelimit)
+            {
+                $commandass[$profilekey] = Array($i, $key,  "", -1);
+                $profilekey = $profilekey + 1;
+            }
             $i++;
             if($i == $profilelimit)
             {
                 break;
             }
         }
-        $this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, $i, 0, 0, 1, $commandass);
+        $this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, $profilekey, 0, 0, 1, $commandass);
         IPS_SetVariableCustomProfile($wfcommandid, $profilename);
         BroadlinkDevice_EnableWFVariable($iid, $ident);
         return $wfcommandid;
@@ -325,7 +329,15 @@ class BroadlinkGateway extends IPSModule
             if($obj['model'] == "RM2" || $obj['model'] == "RM2 Pro Plus" || $obj['model'] == "RM2 Pro Plus2")
             {
 
-                $device->Auth();
+                $authresponse = $device->Auth();
+                $encrytresponse = $authresponse["response"];
+                $payload = $authresponse["payload"];
+                $id = $authresponse["id"];
+                $key = $authresponse["key"];
+                $this->SendDebug("Auth Response:", $encrytresponse,0);
+                $this->SendDebug("Auth Payload:", $payload,0);
+                $this->SendDebug("Auth ID:", $id,0);
+                $this->SendDebug("Auth Key:", $key,0);
                 $temperature = $device->Check_temperature();
                 $obj['temperature'] = $temperature;
                 $this->CheckExistingIdent($obj);
@@ -339,11 +351,21 @@ class BroadlinkGateway extends IPSModule
             else if($obj['model'] == "A1")
             {
 
-                $device->Auth();
+                $authresponse = $device->Auth();
+                $encrytresponse = $authresponse["response"];
+                $payload = $authresponse["payload"];
+                $id = $authresponse["id"];
+                $key = $authresponse["key"];
+                $this->SendDebug("Auth Response:", $encrytresponse,0);
+                $this->SendDebug("Auth Payload:", $payload,0);
+                $this->SendDebug("Auth ID:", $id,0);
+                $this->SendDebug("Auth Key:", $key,0);
                 $data = $device->Check_sensors();
-
+                $this->SendDebug("Broadlink Discover A1:", $data,0);
                 $obj = array_merge($obj, $data);
                 $iid = $this->CreateA1($obj);
+                $this->SendDebug("Broadlink A1:", "ObjectID: ".$iid,0);
+                $this->SendDebug("Broadlink A1:", $obj,0);
                 $this->UpdateA1($iid, $obj);
                 IPS_SetProperty($this->InstanceID, "a1device", true);
                 $this->SendDebug("Broadlink Discover:", "A1 Device found",0);
@@ -746,6 +768,42 @@ class BroadlinkGateway extends IPSModule
             IPS_SetVariableProfileAssociation($Name, $Association[0], $Association[1], $Association[2], $Association[3]);
         }
 
+    }
+
+    /**
+     * Ergänzt SendDebug um Möglichkeit Objekte und Array auszugeben.
+     *
+     * @access protected
+     * @param string $Message Nachricht für Data.
+     * @param mixed $Data Daten für die Ausgabe.
+     * @return int $Format Ausgabeformat für Strings.
+     */
+    protected function SendDebug($Message, $Data, $Format)
+    {
+
+        if (is_object($Data))
+        {
+            foreach ($Data as $Key => $DebugData)
+            {
+
+                $this->SendDebug($Message . ":" . $Key, $DebugData, 0);
+            }
+        }
+        else if (is_array($Data))
+        {
+            foreach ($Data as $Key => $DebugData)
+            {
+                $this->SendDebug($Message . ":" . $Key, $DebugData, 0);
+            }
+        }
+        else if (is_bool($Data))
+        {
+            parent::SendDebug($Message, ($Data ? 'true' : 'false'), 0);
+        }
+        else
+        {
+            parent::SendDebug($Message, (string) $Data, $Format);
+        }
     }
 }
 ?>
