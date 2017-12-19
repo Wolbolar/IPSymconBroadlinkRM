@@ -105,7 +105,7 @@ class BroadlinkGateway extends IPSModule
         return $result;
     }
 
-    public function ImportCode($devicename, $command_name, $commandhex)
+    public function ImportCode(string $devicename, string $command_name, string $commandhex)
     {
         if($devicename == "" || $command_name == "")
         {

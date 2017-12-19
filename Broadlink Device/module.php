@@ -47,7 +47,7 @@
 			return $result;
 		}
 
-		public function EnableWFVariable($ident)
+		public function EnableWFVariable(string $ident)
 		{
             $this->EnableAction($ident);
 		}
