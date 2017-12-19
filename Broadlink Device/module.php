@@ -473,7 +473,7 @@
             }
             $this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, $profilekey, 0, 0, 1, $commandass);
             IPS_SetVariableCustomProfile($wfcommandid, $profilename);
-            $this->EnableWFVariable($ident);
+            $this->EnableAction($ident);
             return $wfcommandid;
         }
 	}
