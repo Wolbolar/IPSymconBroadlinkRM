@@ -17,7 +17,10 @@
 			"No active Broadlink I/O.":"Kein aktiver Broadlink I/O",
 			"Interface closed.": "Interface geschlossen.",
 			"Broadlink A1 created.": "Broadlink A1 erstellt.",
-			"choose category for Broadlink devices.": "Kategorie für den Broadlink Geräte auswählen."
+			"choose category for Broadlink devices.": "Kategorie für den Broadlink Geräte auswählen.",
+			"seconds": "Sekunden",
+            "minutes": "Minuten",
+			"Broadlink A1 update interval": "Broadlink A1 Aktualisierungsintervall"
 		}
 	}
 }

@@ -41,8 +41,9 @@ In der _Modules_ Instanz rechts oben auf den Button __*Hinzufügen*__ drücken.
  
 In dem sich öffnenden Fenster folgende URL hinzufügen:
 
-	
-    `https://github.com/Wolbolar/IPSymconBroadlinkRM`  
+```	
+https://github.com/Wolbolar/IPSymconBroadlinkRM  
+```
     
 und mit _OK_ bestätigen.    
     
