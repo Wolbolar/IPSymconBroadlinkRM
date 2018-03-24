@@ -184,7 +184,10 @@ class BroadlinkGateway extends IPSModule
 		$payload = json_decode($datasend);
 		$name = $payload->name;
 		$command = $payload->command;
-		$command_code = $payload->command_code;
+		if(isset($payload->command_code))
+		{
+			$command_code = $payload->command_code;
+		}
 		if ($command == "UpdateA1") {
 			$this->Discover();
 			$result = true;

@@ -465,10 +465,34 @@ class Broadlink
 		$packet[0x2d] = $this->mac[3];
 		$packet[0x2e] = $this->mac[4];
 		$packet[0x2f] = $this->mac[5];
-		$packet[0x30] = $this->id[0];
-		$packet[0x31] = $this->id[1];
-		$packet[0x32] = $this->id[2];
-		$packet[0x33] = $this->id[3];
+		if(isset($this->id[0]))
+		{
+			$packet[0x30] = $this->id[0];
+		}
+		else{
+			$packet[0x30] = 0;
+		}
+		if(isset($this->id[1]))
+		{
+			$packet[0x31] = $this->id[1];
+		}
+		else{
+			$packet[0x31] = 0;
+		}
+		if(isset($this->id[2]))
+		{
+			$packet[0x32] = $this->id[2];
+		}
+		else{
+			$packet[0x32] = 0;
+		}
+		if(isset($this->id[3]))
+		{
+			$packet[0x33] = $this->id[3];
+		}
+		else{
+			$packet[0x33] = 0;
+		}
 
 		$checksum = 0xbeaf;
 		for ($i = 0; $i < sizeof($payload); $i++) {
