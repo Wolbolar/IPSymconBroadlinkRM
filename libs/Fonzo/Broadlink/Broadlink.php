@@ -206,7 +206,7 @@ class Broadlink
 				$type = "RM2 Pro Plus BL";
 				break;
 			case 0x279d:
-				$type = "RM2 Pro Plus";
+				$type = "RM2 Pro Plus3";
 				break;
 			case 0x278f:
 				$type = "RM Mini Shate";

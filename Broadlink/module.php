@@ -256,7 +256,7 @@ class BroadlinkGateway extends IPSModule
 			$obj['model'] = $device->model();
 			$this->SendDebug("model:", $obj['model'], 0);
 
-			if ($obj['model'] == "RM2" || $obj['model'] == "RM2 Pro Plus" || $obj['model'] == "RM2 Pro Plus2") {
+			if ($obj['model'] == "RM2" || $obj['model'] == "RM2 Pro Plus" || $obj['model'] == "RM2 Pro Plus2" || $obj['model'] == "RM2 Pro Plus3" ) {
 				$authresponse = $device->Auth();
 				$payload = $authresponse["payload"];
 				$this->SendDebug("Auth Payload:", $payload, 0);
