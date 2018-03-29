@@ -40,7 +40,7 @@ class BroadlinkGateway extends IPSModule
 			$this->SendDebug("Broadlink:", "Parent active", 0);
 		}
 		$devicetype = $this->ReadPropertyString("devicetype");
-		if ($devicetype == "0x2712" || $devicetype == "0x272a" || $devicetype == "0x2787") {
+		if ($devicetype == "0x2712" || $devicetype == "0x272a" || $devicetype == "0x2787" || $devicetype == "0x279d") {
 			$this->RegisterVariableFloat("Temperature", "Temperatur", "~Temperature");
 		}
 
