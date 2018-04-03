@@ -8,7 +8,10 @@ function aes128_cbc_encrypt($key, $data, $iv)
 {
 	/* ~-- ENCRYPT -----------~ */
 	// append zero padding until 16bit reached
-	$data = str_pad($data, 16, chr(0), STR_PAD_RIGHT);
+	// $data = str_pad($data, 16, chr(0), STR_PAD_RIGHT);
+	if (strlen($data) % 16) {
+		$data = str_pad($data, strlen($data) + 16 - strlen($data) % 16, "\0");
+	}
 
 	// encrypt with aes 128 cbc
 	$encrypted = openssl_encrypt($data, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv);
@@ -471,32 +474,24 @@ class Broadlink
 		$packet[0x2d] = $this->mac[3];
 		$packet[0x2e] = $this->mac[4];
 		$packet[0x2f] = $this->mac[5];
-		if(isset($this->id[0]))
-		{
+		if (isset($this->id[0])) {
 			$packet[0x30] = $this->id[0];
-		}
-		else{
+		} else {
 			$packet[0x30] = 0;
 		}
-		if(isset($this->id[1]))
-		{
+		if (isset($this->id[1])) {
 			$packet[0x31] = $this->id[1];
-		}
-		else{
+		} else {
 			$packet[0x31] = 0;
 		}
-		if(isset($this->id[2]))
-		{
+		if (isset($this->id[2])) {
 			$packet[0x32] = $this->id[2];
-		}
-		else{
+		} else {
 			$packet[0x32] = 0;
 		}
-		if(isset($this->id[3]))
-		{
+		if (isset($this->id[3])) {
 			$packet[0x33] = $this->id[3];
-		}
-		else{
+		} else {
 			$packet[0x33] = 0;
 		}
 
