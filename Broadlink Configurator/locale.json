@@ -1,0 +1,36 @@
+{
+  "translations": {
+    "de": {
+      "device name": "Geräte Name",
+      "manufacturer": "Hersteller",
+      "type": "Typ",
+      "device id": "Geräte ID",
+      "devices": "Geräte",
+      "IP adress": "IP Adresse",
+      "mac": "MAC",
+      "model": "Modell",
+      "broadlink name": "Broadlink Name",
+      "device type": "Geräte Typ",
+      "category Broadlink": "Kategorie Broadlink",
+      "category for Broadlink devices": "Kategorie Broadlink Geräte",
+      "Broadlink devices": "Broadlink Geräte",
+      "Create new Broadlink device instance:": "Neue Broadlink Geräte Instanz anlegen:",
+      "Please select type": "Bitte Gerätetyp auswählen",
+      "Create": "Anlegen",
+      "Remove devices from the list that have not been created as an instance": "Geräte von der Liste entfernen, die nicht als Instanz angelegt worden sind",
+      "Remove Devices": "Geräte entfernen",
+      "create scripts for remote control (alternative or addition for remote control via webfront):": "Skripte zum Schalten anlegen (Alternative oder Ergänzung zum Schalten aus dem Webfront):",
+      "Broadlink script": "Broadlink Skript",
+      "Refresh list": "Liste aktualisieren",
+      "Read configuration": "Konfiguration auslesen",
+      "Add Device:": "Gerät hinzufügen:",
+      "device name:": "Geräte Name:",
+      "Creating instance.": "Instanz erstellen.",
+      "Broadlink configurator created.": "Broadlink Konfigurator erstellt.",
+      "interface closed.": "Interface geschlossen.",
+      "Please follow the instructions.": "Bitte den Anleitung folgen.",
+      "no category selected.": "keine Kategorie ausgewählt."
+
+    }
+  }
+}

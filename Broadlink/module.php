@@ -17,14 +17,18 @@ class BroadlinkGateway extends IPSModule
 		$this->RegisterPropertyString("name", "");
 		$this->RegisterPropertyString("host", "");
 		$this->RegisterPropertyString("mac", "");
-		$this->RegisterPropertyString("modell", "");
+		$this->RegisterPropertyString("model", "");
 		$this->RegisterPropertyString("devicetype", "");
-		$this->RegisterPropertyInteger("CategoryID", 0);
-		$this->RegisterPropertyString("devicename", "");
-		$this->RegisterPropertyString("command", "");
+		$this->RegisterAttributeInteger("CategoryID", 0);
 		$this->RegisterPropertyInteger("a1interval", 0);
-		$this->RegisterPropertyBoolean("a1device", false);
+		$this->RegisterPropertyInteger("temperatureinterval", 0);
+		$this->RegisterAttributeBoolean("a1device", false);
+		$this->RegisterAttributeString("devices", "[]");
 		$this->RegisterTimer('A1Update', 0, 'Broadlink_A1Timer(' . $this->InstanceID . ');');
+		$this->RegisterTimer('TemperatureUpdate', 0, 'Broadlink_TemperatureTimer(' . $this->InstanceID . ');');
+
+		//we will wait until the kernel is ready
+		$this->RegisterMessage(0, IPS_KERNELMESSAGE);
 	}
 
 	public function ApplyChanges()
@@ -32,28 +36,20 @@ class BroadlinkGateway extends IPSModule
 		//Never delete this line!
 		parent::ApplyChanges();
 
-		$ParentID = $this->GetParent();
-
-
-		// Wenn I/O verbunden ist
-		if ($this->HasActiveParent($ParentID)) {
-			$this->SendDebug("Broadlink:", "Parent active", 0);
+		if (IPS_GetKernelRunlevel() !== KR_READY) {
+			return;
 		}
+
+
 		$devicetype = $this->ReadPropertyString("devicetype");
 		if ($devicetype == "0x2712" || $devicetype == "0x272a" || $devicetype == "0x2787" || $devicetype == "0x279d") {
 			$this->RegisterVariableFloat("Temperature", "Temperatur", "~Temperature");
 		}
 
-		//Import Kategorie
-		$ImportCategoryID = $this->ReadPropertyInteger('CategoryID');
-		if ($ImportCategoryID === 0) {
-			// Status Error Kategorie zum Import auswählen
-			$this->SetStatus(211);
-		} elseif ($ImportCategoryID != 0) {
-			// Status Error Kategorie zum Import auswählen
-			$this->SetStatus(102);
-		}
+
 		$this->SetA1Interval();
+		$this->SetTemperatureInterval();
+		$this->Discover();
 	}
 
 	/**
@@ -67,105 +63,97 @@ class BroadlinkGateway extends IPSModule
 		$this->Discover();
 	}
 
+	public function TemperatureTimer()
+	{
+		$this->Discover();
+	}
+
 	protected function SetA1Interval()
 	{
-		$a1device = $this->ReadPropertyBoolean("a1device");
+		$a1device = $this->ReadAttributeBoolean("a1device");
 		$a1interval = $this->ReadPropertyInteger("a1interval");
 		$interval = $a1interval * 60 * 1000;
-		if ($a1device) {
-
+		if ($a1device)
+		{
 			$this->SetTimerInterval("A1Update", $interval);
 		} else {
 			$this->SetTimerInterval("A1Update", 0);
 		}
-
 	}
 
-	public function LearnDeviceCode(string $devicename, string $command_name)
+	protected function SetTemperatureInterval()
 	{
-		$result = $this->LearnDevice($devicename, $command_name);
-		return $result;
-	}
-
-	public function Learn()
-	{
-		$devicename = $this->ReadPropertyString("devicename");
-		$command_name = $this->ReadPropertyString("command");
-		$result = $this->LearnDevice($devicename, $command_name);
-		return $result;
-	}
-
-	public function ImportCode(string $devicename, string $command_name, string $commandhex)
-	{
-		if ($devicename == "" || $command_name == "") {
-			$this->SendDebug("Broadlink Learn:", "Empty device name or command name", 0);
-			$result = "Empty device name or command name";
-			return $result;
+		$model = $this->ReadPropertyString("model");
+		$this->SendDebug("Broadlink IO:", "broadlink io model ".$model, 0);
+		$temperatureinterval = $this->ReadPropertyInteger("temperatureinterval");
+		$interval = $temperatureinterval * 60 * 1000;
+		if ($model == "RM2" || $model == "RM2 Pro Plus" || $model == "RM2 Pro Plus2" || $model == "RM2 Pro Plus3")
+		{
+			$this->SendDebug("Broadlink IO:", "found model ".$model." , set interval for temperature update to ".$temperatureinterval." minutes", 0);
+			$this->SetTimerInterval("TemperatureUpdate", $interval);
+		} else {
+			$this->SetTimerInterval("TemperatureUpdate", 0);
 		}
-		$deviceident = str_replace(" ", "_", $devicename);
-		$ImportCategoryID = $this->ReadPropertyInteger('CategoryID');
-		$iid = $this->CreateInstanceByIdent($ImportCategoryID, $deviceident, $devicename);
-		$commandsid = $this->CreateVariableByIdent($iid, "Commands", "Commands", 3);
-		IPS_SetHidden($commandsid, true);
-		$valuesjson = GetValue(IPS_GetObjectIDByIdent("Commands", $iid));
-		$values = json_decode($valuesjson, true);
-		$values[$command_name] = $commandhex;
-		$this->SendToDevice($deviceident, $values);
-		return $iid;
+
 	}
 
-	protected function LearnDevice($devicename, $command_name)
+	public function Set_IO_Name()
+	{
+		$name = IPS_GetName($this->InstanceID);
+		if ($name == "BroadlinkGateway") {
+			$model = $this->ReadPropertyString("model");
+			$host = $this->ReadPropertyString("host");
+			IPS_SetName($this->InstanceID, $model . " I/O (" . $host . ")");
+		}
+	}
+
+	protected function SetCategoryID($CategoryID)
+	{
+		$this->WriteAttributeInteger("CategoryID", $CategoryID);
+	}
+
+	protected function GetDevices()
+	{
+		$devices = $this->ReadAttributeString("devices");
+		return $devices;
+	}
+
+	protected function GetModel()
+	{
+		$model = $this->ReadPropertyString("model");
+		return $model;
+	}
+
+	protected function GetHost()
+	{
+		$host = $this->ReadPropertyString("host");
+		return $host;
+	}
+
+	public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
 	{
 
-		if ($devicename == "" || $command_name == "") {
-			$this->SendDebug("Broadlink Learn:", "Empty device name or command name", 0);
-			$result = "Empty device name or command name";
-			return $result;
+		switch ($Message) {
+			case IM_CHANGESTATUS:
+				if ($Data[0] === IS_ACTIVE) {
+					$this->ApplyChanges();
+				}
+				break;
+
+			case IPS_KERNELMESSAGE:
+				if ($Data[0] === KR_READY) {
+					$this->ApplyChanges();
+				}
+				break;
+
+			default:
+				break;
 		}
-		$deviceident = str_replace(" ", "_", $devicename);
-		$ImportCategoryID = $this->ReadPropertyInteger('CategoryID');
-		$iid = $this->CreateInstanceByIdent($ImportCategoryID, $deviceident, $devicename);
-		$commandsid = $this->CreateVariableByIdent($iid, "Commands", "Commands", 3);
-		IPS_SetHidden($commandsid, true);
-		$json = array();
-		$info = array("devtype" => $this->ReadPropertyString("devicetype"), "name" => json_decode($this->ReadPropertyString("name")), "mac" => $this->ReadPropertyString("mac"), "host" => $this->ReadPropertyString("host"), "model" => $this->ReadPropertyString("modell"));
-		$json['code'] = -1;
-		$devtype = Broadlink::getdevtype($info['devtype']);
-		if ($devtype == 2) {
-
-			$rm = Broadlink::CreateDevice($info['host'], $info['mac'], 80, $info['devtype']);
-
-			$rm->Auth();
-			$rm->Enter_learning();
-
-			sleep(10);
-
-			$json['hex'] = $rm->Check_data();
-
-			$json['code'] = 1;
-
-			$json['hex_number'] = '';
-
-			foreach ($json['hex'] as $value) {
-				$json['hex_number'] .= sprintf("%02x", $value);
-			}
-
-			if (strlen($command_name) > 0 && count($json['hex']) > 0) {
-				$valuesjson = GetValue(IPS_GetObjectIDByIdent("Commands", $iid));
-				$values = json_decode($valuesjson, true);
-				$values[$command_name] = $json['hex_number'];
-				$this->SendToDevice($deviceident, $values);
-			}
-		}
-		$result = json_encode($json, JSON_NUMERIC_CHECK);
-		$this->SendDebug("Broadlink Learn:", $result, 0);
-		IPS_LogMessage("Broadlink Learn:", $result);
-		return $result;
 	}
 
 	protected function SendToDevice($deviceident, $command)
 	{
-		$data = array ("ident" => $deviceident, "command" => $command);
+		$data = array("ident" => $deviceident, "command" => $command);
 		// send to device / children
 		$this->SendDataToChildren(json_encode(Array("DataID" => "{A05B41B1-7478-8E54-296E-17F406FD3876}", "Buffer" => $data)));
 	}
@@ -184,12 +172,24 @@ class BroadlinkGateway extends IPSModule
 		$payload = json_decode($datasend);
 		$name = $payload->name;
 		$command = $payload->command;
-		if(isset($payload->command_code))
-		{
+		if (isset($payload->command_code)) {
 			$command_code = $payload->command_code;
 		}
 		if ($command == "UpdateA1") {
 			$this->Discover();
+			$result = true;
+		} elseif ($command == "GetModel") {
+			$model = $this->GetModel();
+			$result = $model;
+		} elseif ($command == "GetHubIP") {
+			$host = $this->GetHost();
+			$result = $host;
+		} elseif ($command == "GetDevices") {
+			$devices = $this->GetDevices();
+			$result = $devices;
+		} elseif ($command == "SetCategory") {
+			$CategoryID = $payload->categoryid;
+			$this->SetCategoryID($CategoryID);
 			$result = true;
 		} else {
 			$this->SendDebug("Broadlink Device:", $name, 0);
@@ -205,7 +205,7 @@ class BroadlinkGateway extends IPSModule
 	{
 		$this->SendDebug("Broadlink Send:", $command, 0);
 		$json = array();
-		$info = array("devtype" => $this->ReadPropertyString("devicetype"), "name" => json_decode($this->ReadPropertyString("name")), "mac" => $this->ReadPropertyString("mac"), "host" => $this->ReadPropertyString("host"), "model" => $this->ReadPropertyString("modell"));
+		$info = array("devtype" => $this->ReadPropertyString("devicetype"), "name" => json_decode($this->ReadPropertyString("name")), "mac" => $this->ReadPropertyString("mac"), "host" => $this->ReadPropertyString("host"), "model" => $this->ReadPropertyString("model"));
 		$json['code'] = -1;
 		$devtype = Broadlink::getdevtype($info['devtype']);
 
@@ -256,7 +256,7 @@ class BroadlinkGateway extends IPSModule
 			$obj['model'] = $device->model();
 			$this->SendDebug("model:", $obj['model'], 0);
 
-			if ($obj['model'] == "RM2" || $obj['model'] == "RM2 Pro Plus" || $obj['model'] == "RM2 Pro Plus2" || $obj['model'] == "RM2 Pro Plus3" ) {
+			if ($obj['model'] == "RM2" || $obj['model'] == "RM2 Pro Plus" || $obj['model'] == "RM2 Pro Plus2" || $obj['model'] == "RM2 Pro Plus3") {
 				$authresponse = $device->Auth();
 				$payload = $authresponse["payload"];
 				$this->SendDebug("Auth Payload:", $payload, 0);
@@ -268,12 +268,12 @@ class BroadlinkGateway extends IPSModule
 				$this->SendDebug("Auth Response:", $encrytresponse, 0);
 				$temperature = $device->Check_temperature();
 				$obj['temperature'] = $temperature;
-				$this->CheckExistingIdent($obj);
+				$this->UpdateGatewayData($obj);
 			}
 			if ($obj['model'] == "RM Mini") {
 
 				// $device->Auth();
-				$this->CheckExistingIdent($obj);
+				$this->UpdateGatewayData($obj);
 			} else if ($obj['model'] == "A1") {
 				$authresponse = $device->Auth();
 				$payload = $authresponse["payload"];
@@ -287,38 +287,17 @@ class BroadlinkGateway extends IPSModule
 				$data = $device->Check_sensors();
 				$this->SendDebug("Broadlink Discover A1:", $data, 0);
 				$obj = array_merge($obj, $data);
-				$iid = $this->CreateA1($obj);
-				$this->SendDebug("Broadlink A1:", "ObjectID: " . $iid, 0);
-				$this->SendDebug("Broadlink A1:", $obj, 0);
+
 				$this->UpdateA1($obj);
-				IPS_SetProperty($this->InstanceID, "a1device", true);
+				$this->WriteAttributeBoolean("a1device", true);
 				$this->SendDebug("Broadlink Discover:", "A1 Device found", 0);
-				IPS_ApplyChanges($this->InstanceID); //Neue Konfiguration übernehmen
 			}
 			array_push($result, $obj);
 		}
 		return $result;
 	}
 
-	protected function CheckExistingIdent($device)
-	{
-		$ident = IPS_GetObject($this->InstanceID)["ObjectIdent"];
-		$mac = $device["mac"];
-		$deviceident = str_replace(":", "_", $mac);
-		if ($ident == "") {
-			// set ident
-			IPS_SetIdent($this->InstanceID, $deviceident);
-			$this->UpdateGatewayData($this->InstanceID, $device);
-		} elseif ($ident == $deviceident) {
-			$this->UpdateGatewayData($this->InstanceID, $device);
-		} else {
-			$iid = $this->CreateNewGateway($device);
-			$this->UpdateGatewayData($iid, $device);
-		}
-		return $deviceident;
-	}
-
-	protected function UpdateGatewayData($iid, $device)
+	protected function UpdateGatewayData($device)
 	{
 		$type = $device["devtype"];
 		$host = $device["host"];
@@ -328,118 +307,35 @@ class BroadlinkGateway extends IPSModule
 		if (isset($device["temperature"])) {
 			$temperature = floatval($device["temperature"]);
 		}
-		IPS_SetProperty($iid, "name", json_encode($name));
-		$this->SendDebug("Broadlink Discover:", "Name " . json_encode($name), 0);
-		IPS_SetProperty($iid, "host", $host);
+		$this->SendDebug("Broadlink Discover:", "Name " . $name, 0);
 		$this->SendDebug("Broadlink Discover:", "Host " . $host, 0);
-		IPS_SetProperty($iid, "mac", $mac);
 		$this->SendDebug("Broadlink Discover:", "Mac " . $mac, 0);
-		IPS_SetProperty($iid, "modell", $model);
 		$this->SendDebug("Broadlink Discover:", "Model " . $model, 0);
-		IPS_SetProperty($iid, "devicetype", $type);
 		$this->SendDebug("Broadlink Discover:", "Device type " . $type, 0);
-		IPS_ApplyChanges($iid); //Neue Konfiguration übernehmen
 
-		if ($model == "RM2" || $model == "RM2 Pro Plus" || $model == "RM2 Pro Plus2") {
-			$temperatureid = $this->CreateVariableByIdent($iid, "Temperature", "Temperatur", 2);
+		if ($model == "RM2" || $model == "RM2 Pro Plus" || $model == "RM2 Pro Plus2" || $model == "RM2 Pro Plus3" ) {
 			$this->SendDebug("Broadlink Discover:", "Temperature " . $temperature, 0);
-			IPS_SetVariableCustomProfile($temperatureid, "~Temperature");
-			$this->SetValue('Temperature', $temperature);
+			$io_mac = $this->ReadPropertyString("mac");
+			if($io_mac == $mac)
+			{
+				$this->SetValue('Temperature', $temperature);
+			}
 		}
-	}
-
-	protected function CreateNewGateway($device)
-	{
-		$mac = $device["mac"];
-		$deviceident = str_replace(":", "_", $mac);
-		$iid = @IPS_GetObjectIDByIdent($deviceident, 0);
-		if ($iid === false) {
-			$moduleid = "{E58707E8-8E2C-26D4-A7A9-2D6D6D93AB04}"; // Broadlink Gateway
-			$iid = IPS_CreateInstance($moduleid);
-			IPS_SetName($iid, "Broadlink Gateway");
-			IPS_SetIdent($iid, $deviceident);
-		}
-		return $iid;
-	}
-
-	protected function CreateA1($device)
-	{
-		$mac = $device["mac"];
-		$deviceident = str_replace(":", "_", $mac);
-		$ImportCategoryID = $this->ReadPropertyInteger('CategoryID');
-		$iid = @IPS_GetObjectIDByIdent($deviceident, $ImportCategoryID);
-		if ($iid === false) {
-			$moduleid = "{1A1402D6-B4BD-F179-444E-9E351075D937}"; // Broadlink A1
-			$iid = IPS_CreateInstance($moduleid);
-			IPS_SetParent($iid, $ImportCategoryID);
-			IPS_SetName($iid, "Broadlink A1 Sensor");
-			IPS_SetIdent($iid, $deviceident);
-		}
-		return $iid;
 	}
 
 	protected function UpdateA1($device)
 	{
 		$mac = $device["mac"];
 		$deviceident = str_replace(":", "_", $mac);
-		$data = array ("ident" => $deviceident, "device" => $device);
+		$data = array("ident" => $deviceident, "device" => $device);
 		// send to device / children
 		$this->SendDataToChildren(json_encode(Array("DataID" => "{D6AB7ABE-1A40-F949-C5B3-64AEAAB179D8}", "Buffer" => $data)));
 	}
 
-	protected function CreateVariableByIdent($id, $ident, $name, $type, $profile = "")
-	{
-		$vid = @IPS_GetObjectIDByIdent($ident, $id);
-		if ($vid === false) {
-			$vid = IPS_CreateVariable($type);
-			IPS_SetParent($vid, $id);
-			IPS_SetName($vid, $name);
-			IPS_SetIdent($vid, $ident);
-			if ($profile != "")
-				IPS_SetVariableCustomProfile($vid, $profile);
-		}
-		return $vid;
-	}
 
-	// Create Broadlink Instance
-	protected function CreateInstanceByIdent($id, $ident, $name, $moduleid = "{B5A1F2D9-0530-6130-5933-9D0E916E8F8A}")
-	{
-		$iid = @IPS_GetObjectIDByIdent($ident, $id);
-		if ($iid === false) {
-			$iid = IPS_CreateInstance($moduleid);
-			IPS_SetParent($iid, $id);
-			IPS_SetName($iid, $name);
-			IPS_SetIdent($iid, $ident);
-		}
-		return $iid;
-	}
 
 	################## DUMMYS / WOARKAROUNDS - protected
 
-	protected function GetParent()
-	{
-		$instance = IPS_GetInstance($this->InstanceID);
-		return ($instance['ConnectionID'] > 0) ? $instance['ConnectionID'] : false;
-	}
-
-	protected function HasActiveParent($ParentID)
-	{
-		if ($ParentID > 0) {
-			$parent = IPS_GetInstance($ParentID);
-			if ($parent['InstanceStatus'] == 102) {
-				$this->SetStatus(102);
-				return true;
-			}
-		}
-		$this->SetStatus(203);
-		return false;
-	}
-
-	protected function SetStatus($InstanceStatus)
-	{
-		if ($InstanceStatus <> IPS_GetInstance($this->InstanceID)['InstanceStatus'])
-			parent::SetStatus($InstanceStatus);
-	}
 
 	protected function SendJSON($data)
 	{
@@ -447,131 +343,196 @@ class BroadlinkGateway extends IPSModule
 		$this->SendDataToChildren(json_encode(Array("DataID" => "{A05B41B1-7478-8E54-296E-17F406FD3876}", "Buffer" => $data))); //  I/O RX GUI
 	}
 
-	//Configuration Form
+	/***********************************************************
+	 * Configuration Form
+	 ***********************************************************/
+
+	/**
+	 * build configuration form
+	 * @return string
+	 */
 	public function GetConfigurationForm()
 	{
-		$formhead = $this->FormHead();
-		$formselection = $this->FormSelection();
-		$formstatus = $this->FormStatus();
-		$formactions = $this->FormActions();
-		$formelementsend = '{ "type": "Label", "label": "__________________________________________________________________________________________________" }';
-
-		return '{ ' . $formhead . $formselection . $formelementsend . '],' . $formactions . $formstatus . ' }';
+		// return current form
+		return json_encode([
+			'elements' => $this->FormHead(),
+			'actions' => $this->FormActions(),
+			'status' => $this->FormStatus()
+		]);
 	}
 
-
-	protected function FormSelection()
-	{
-		$a1device = $this->ReadPropertyBoolean("a1device");
-		if ($a1device) {
-			$form = '{ "type": "Label", "label": "Category for Broadlink devices" },
-                    { "type": "SelectCategory", "name": "CategoryID", "caption": "Category" },';
-		} else {
-			$form = '{ "type": "Label", "label": "Category for Broadlink devices" },
-                    { "type": "SelectCategory", "name": "CategoryID", "caption": "Category" },
-                    { "type": "Label", "label": "Update inteval A1 Sensor in minutes" },
-                    { "type": "IntervalBox", "name": "a1interval", "caption": "minutes" },';
-		}
-		return $form;
-	}
-
+	/**
+	 * return form configurations on configuration step
+	 * @return array
+	 */
 	protected function FormHead()
 	{
 		$mac = $this->ReadPropertyString("mac");
 		if ($mac == "") {
-			$form = '"elements":
-            [
-				{ "type": "Label", "label": "Broadlink" },
-				{ "type": "Label", "label": "Discover Device" },
-				{ "type": "Button", "label": "Discover", "onClick": "Broadlink_Discover($id);" },';
+			$form = [
+				[
+					'type' => 'Label',
+					'caption' => 'Broadlink'
+				],
+				[
+					'type' => 'Label',
+					'caption' => 'Discover Device'
+				],
+				[
+					'type' => 'Button',
+					'caption' => 'Discover',
+					'onClick' => 'Broadlink_Discover($id);'
+				]
+			];
 		} else {
-			$form = '"elements":
-            [
-				{ "type": "Label", "label": "Broadlink" },
-				{ "type": "Label", "label": "Broadlink Name" },
-				{
-					"name": "name",
-					"type": "ValidationTextBox",
-					"caption": "Name"
-				},
-				{ "type": "Label", "label": "Broadlink IP address" },
-				{
-					"name": "host",
-					"type": "ValidationTextBox",
-					"caption": "IP address"
-				},
-				{ "type": "Label", "label": "Broadlink MAC address" },
-				{
-					"name": "mac",
-					"type": "ValidationTextBox",
-					"caption": "MAC address"
-				},
-				{ "type": "Label", "label": "Broadlink Modell" },
-				{
-					"name": "modell",
-					"type": "ValidationTextBox",
-					"caption": "Modell"
-				},
-				{ "type": "Label", "label": "Broadlink Device type" },
-				{
-					"name": "devicetype",
-					"type": "ValidationTextBox",
-					"caption": "Device type"
-				},';
+			$form = [
+				[
+					'type' => 'Label',
+					'caption' => 'Broadlink'
+				],
+				[
+					'type' => 'List',
+					'name' => 'BroadlinkInformation',
+					'caption' => 'Broadlink information',
+					'rowCount' => 2,
+					'add' => false,
+					'delete' => false,
+					'sort' => [
+						'column' => 'host',
+						'direction' => 'ascending'
+					],
+					'columns' => [
+						[
+							'name' => 'name',
+							'caption' => 'Name',
+							'width' => '370px',
+							'visible' => true
+						],
+						[
+							'name' => 'host',
+							'caption' => 'IP address',
+							'width' => '150px',
+						],
+						[
+							'name' => 'mac',
+							'caption' => 'MAC address',
+							'width' => '150px',
+						],
+						[
+							'name' => 'model',
+							'caption' => 'Model',
+							'width' => 'auto',
+						],
+						[
+							'name' => 'devicetype',
+							'caption' => 'Device type',
+							'width' => '150px',
+						]
+					],
+					'values' => [
+						[
+							'name' => $this->ReadPropertyString("name"),
+							'host' => $this->ReadPropertyString("host"),
+							'mac' => $this->ReadPropertyString("mac"),
+							'model' => $this->ReadPropertyString("model"),
+							'devicetype' => $this->ReadPropertyString("devicetype")
+						]]
+				]
+			];
+		}
+		$model = $this->ReadPropertyString("model");
+		if ($model == "RM2" || $model == "RM2 Pro Plus" || $model == "RM2 Pro Plus2" || $model == "RM2 Pro Plus3" ) {
+			$form = array_merge_recursive(
+				$form,
+				[
+					[
+						'type' => 'Label',
+						'caption' => 'Update inteval temperature sensor in minutes'
+					],
+					[
+						'name' => 'temperatureinterval',
+						'type' => 'IntervalBox',
+						'caption' => 'minutes'
+					]
+				]
+			);
 		}
 		return $form;
 	}
 
+	/**
+	 * return form actions by token
+	 * @return array
+	 */
 	protected function FormActions()
 	{
-		$mac = $this->ReadPropertyString("mac");
-		if ($mac == "") {
-			$form = '"actions":
+		$form = [
 			[
-				{ "type": "Label", "label": "Discover Device" },
-				{ "type": "Button", "label": "Discover", "onClick": "Broadlink_Discover($id);" }
-			],';
-		} else {
-			$form = '"actions":
+				'type' => 'Label',
+				'caption' => 'Update Temperature'
+			],
 			[
-				{ "type": "Label", "label": "Discover Device" },
-				{ "type": "Button", "label": "Discover", "onClick": "Broadlink_Discover($id);" }
-			],';
-		}
-
+				'type' => 'Button',
+				'caption' => 'Update',
+				'onClick' => 'Broadlink_Discover($id);'
+			],
+			[
+				'type' => 'Label',
+				'caption' => 'Rename IO'
+			],
+			[
+				'type' => 'Button',
+				'caption' => 'Rename',
+				'onClick' => 'Broadlink_Set_IO_Name($id);'
+			]
+		];
 		return $form;
 	}
 
+	/**
+	 * return from status
+	 * @return array
+	 */
 	protected function FormStatus()
 	{
-		$form = '"status":
-            [
-                {
-                    "code": 101,
-                    "icon": "inactive",
-                    "caption": "Creating instance."
-                },
-				{
-                    "code": 203,
-                    "icon": "error",
-                    "caption": "No active Broadlink I/O."
-                },
-				{
-                    "code": 102,
-                    "icon": "active",
-                    "caption": "Broadlink created."
-                },
-                {
-                    "code": 104,
-                    "icon": "inactive",
-                    "caption": "Interface closed."
-                },
-                {
-                    "code": 211,
-                    "icon": "error",
-                    "caption": "choose category for Broadlink devices."
-                }
-            ]';
+		$form = [
+			[
+				'code' => 101,
+				'icon' => 'inactive',
+				'caption' => 'Creating instance.'
+			],
+			[
+				'code' => 102,
+				'icon' => 'active',
+				'caption' => 'Broadlink created.'
+			],
+			[
+				'code' => 104,
+				'icon' => 'inactive',
+				'caption' => 'Interface closed.'
+			],
+			[
+				'code' => 201,
+				'icon' => 'inactive',
+				'caption' => 'Please follow the instructions.'
+			],
+			[
+				'code' => 202,
+				'icon' => 'error',
+				'caption' => 'special errorcode.'
+			],
+			[
+				'code' => 203,
+				'icon' => 'error',
+				'caption' => 'No active Broadlink I/O.'
+			],
+			[
+				'code' => 211,
+				'icon' => 'error',
+				'caption' => 'choose category for Broadlink devices.'
+			]
+		];
+
 		return $form;
 	}
 
@@ -670,6 +631,38 @@ class BroadlinkGateway extends IPSModule
 		} else {
 			SetValue($this->GetIDForIdent($Ident), $Value);
 		}
+	}
+
+	private function GetIPSVersion()
+	{
+		$ipsversion = floatval(IPS_GetKernelVersion());
+		if ($ipsversion < 4.1) // 4.0
+		{
+			$ipsversion = 0;
+		} elseif ($ipsversion >= 4.1 && $ipsversion < 4.2) // 4.1
+		{
+			$ipsversion = 1;
+		} elseif ($ipsversion >= 4.2 && $ipsversion < 4.3) // 4.2
+		{
+			$ipsversion = 2;
+		} elseif ($ipsversion >= 4.3 && $ipsversion < 4.4) // 4.3
+		{
+			$ipsversion = 3;
+		} elseif ($ipsversion >= 4.4 && $ipsversion < 5) // 4.4
+		{
+			$ipsversion = 4;
+		} elseif ($ipsversion >= 5.0 && $ipsversion < 5.1) // 5.0
+		{
+			$ipsversion = 5;
+		} elseif ($ipsversion >= 5.1 && $ipsversion < 5.2) // 5.1
+		{
+			$ipsversion = 6;
+		} else   // > 5.1
+		{
+			$ipsversion = 7;
+		}
+
+		return $ipsversion;
 	}
 }
 

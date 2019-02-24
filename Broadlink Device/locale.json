@@ -1,11 +1,32 @@
 {
 	"translations": {
 		"de": { 
+			"Broadlink RF device": "Broadlink RF Gerät",
+			"Broadlink IR device": "Broadlink IR Gerät",
+			"Broadlink Import:": "Broadlink Import:",
+			"Insert import code:": "Import Code einfügen",
+			"Import Code": "Import Code",
+			"or select a variable with commands:": "oder Variable auswählen welche die Befehle enthält:",
+			"Import Variable": "Import Variable",
+			"Import code": "Gerätebefehle importieren",
+			"Learn key": "Befehl anlernen",
+			"Learn": "Anlernen",
+			"Send key": "Befehl senden",
+			"Send": "Senden",
+			"key label": "Befehlsname",
+			"IR key label": "IR Befehlsname",
+			"RF key label": "RF Befehlsname",
+			"IR code": "IR Code",
+			"RF Code": "RF Code",
+			"Please Select": "Bitte auswählen",
+			"key": "Befehl",
+			"Import": "Importieren",
 			"available commands": "Verfügbare Befehle:",
 			"Broadlink device name": "Broadlink Geräte Name",
+			"Broadlink device created": "Broadlink Gerät erstellt",
 			"configuration valid": "Konfiguration gültig",
-			"Broadlink Device is inactive": "Broadlink Device ist inaktiv",
-			"creating instance": "Die Instanz wird erstellt"
+			"Broadlink Device is inactive": "Broadlink Gerät ist inaktiv",
+			"Creating instance.": "Die Instanz wird erstellt"
 		}
 	}
 }
