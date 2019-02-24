@@ -5,7 +5,7 @@
     "vendor": "BroadLink",
     "aliases": ["Broadlink I/O"],
     "parentRequirements": [],
-    "childRequirements": ["{A05B41B1-7478-8E54-296E-17F406FD3876}", "{D6AB7ABE-1A40-F949-C5B3-64AEAAB179D8}"],
+    "childRequirements": ["{A05B41B1-7478-8E54-296E-17F406FD3876}", "{D6AB7ABE-1A40-F949-C5B3-64AEAAB179D8}", "{647142B4-028A-7F67-FB50-CC25C3C75654}"],
     "implemented": ["{EFC61574-A0BC-2FBB-065A-8C6B42FC2646}"],
     "prefix": "Broadlink"
 }

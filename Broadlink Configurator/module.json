@@ -1,0 +1,13 @@
+{
+    "id": "{EE791548-91D0-1E0C-7EEB-FD602A3101A0}",
+    "name": "BroadlinkConfigurator",
+    "type": 4,
+    "vendor": "Broadlink",
+    "aliases": ["Broadlink Konfigurator"],
+    "parentRequirements": ["{EFC61574-A0BC-2FBB-065A-8C6B42FC2646}"],
+    "childRequirements": [],
+  "implemented": [
+    "{647142B4-028A-7F67-FB50-CC25C3C75654}"
+  ],
+    "prefix": "BroadlinkConfig"
+}

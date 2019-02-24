@@ -1,5 +1,9 @@
 <?
 
+require_once(__DIR__ . "/../bootstrap.php");
+
+use Fonzo\Broadlink\Broadlink;
+
 class BroadlinkDevice extends IPSModule
 {
 
@@ -8,7 +12,13 @@ class BroadlinkDevice extends IPSModule
 		//Never delete this line!
 		parent::Create();
 		$this->ConnectParent("{E58707E8-8E2C-26D4-A7A9-2D6D6D93AB04}"); // Broadlink I/O
-		$this->RegisterPropertyString("Name", "");
+		$this->RegisterPropertyString("name", "");
+		$this->RegisterPropertyString("mac", "");
+		$this->RegisterPropertyString("ident", "");
+		$this->RegisterPropertyString("devicetype", "");
+		$this->RegisterPropertyString("model", "");
+		$this->RegisterAttributeString("commands", "[]");
+		$this->RegisterPropertyString("BroadlinkCommands", "");
 	}
 
 	public function ApplyChanges()
@@ -27,18 +37,15 @@ class BroadlinkDevice extends IPSModule
 
 	protected function SetupVariables()
 	{
-		$commandsid = $this->CreateVariableByIdent($this->InstanceID, "Commands", "Commands", 3);
-		IPS_SetHidden($commandsid, true);
-		$command = GetValue(IPS_GetObjectIDByIdent("Commands", $this->InstanceID));
-		$deviceident = @IPS_GetObject($this->InstanceID)["ObjectIdent"];
-		$this->CreateWFVariables($deviceident, $command);
+		$commands = $this->GetAvailableCommands();
+		$this->CreateWFVariables($commands);
 	}
 
 	public function SendCommand(string $command)
 	{
-		$deviceident = IPS_GetObject($this->InstanceID)["ObjectIdent"];
+		$ident = $this->ReadPropertyString("ident");
 		$commandhex = $this->GetCommand($command);
-		$payload = array("name" => $deviceident, "command" => $command, "command_code" => $commandhex);
+		$payload = array("name" => $ident, "command" => $command, "command_code" => $commandhex);
 		$this->SendDebug("Send Data:", json_encode($payload), 0);
 
 		//an Splitter schicken
@@ -47,40 +54,44 @@ class BroadlinkDevice extends IPSModule
 		return $result;
 	}
 
-	protected function CreateWFVariable($deviceident, $command)
+	protected function CreateWFVariable($commands)
 	{
+		$deviceident = $this->ReadPropertyString("ident");
 		// count commands
-		$values = json_decode($command, true);
+		$values = $commands;
 		$valuescount = count($values);
-		// 32 Limit
-		if ($valuescount > 32 && $valuescount <= 64) {
-			$profilename = "Broadlink." . $deviceident . ".Command1";
-			$profilecounter = 31;
-			$this->CreateBroadlinkWebFrontVariable("WFCommands1", "Command 1", $values, $profilename, $profilecounter);
-		} elseif ($valuescount > 64 && $valuescount <= 96) {
-			$profilename = "Broadlink." . $deviceident . ".Command2";
-			$profilecounter = 63;
-			$this->CreateBroadlinkWebFrontVariable("WFCommands2", "Command 2", $values, $profilename, $profilecounter);
-		} elseif ($valuescount > 96 && $valuescount <= 128) {
-			$profilename = "Broadlink." . $deviceident . ".Command3";
-			$profilecounter = 95;
-			$this->CreateBroadlinkWebFrontVariable("WFCommands3", "Command 3", $values, $profilename, $profilecounter);
-		} elseif ($valuescount > 128 && $valuescount <= 160) {
-			$profilename = "Broadlink." . $deviceident . ".Command4";
-			$profilecounter = 127;
-			$this->CreateBroadlinkWebFrontVariable("WFCommands4", "Command 4", $values, $profilename, $profilecounter);
-		} elseif ($valuescount > 160 && $valuescount <= 192) {
-			$profilename = "Broadlink." . $deviceident . ".Command5";
-			$profilecounter = 159;
-			$this->CreateBroadlinkWebFrontVariable("WFCommands5", "Command 5", $values, $profilename, $profilecounter);
-		} elseif ($valuescount > 192 && $valuescount <= 224) {
-			$profilename = "Broadlink." . $deviceident . ".Command6";
-			$profilecounter = 191;
-			$this->CreateBroadlinkWebFrontVariable("WFCommands6", "Command 6", $values, $profilename, $profilecounter);
-		} else {
-			$profilename = "Broadlink." . $deviceident . ".Command";
-			$profilecounter = 0;
-			$this->CreateBroadlinkWebFrontVariable("WFCommands", "Command", $values, $profilename, $profilecounter);
+		if($valuescount >0)
+		{
+			// 32 Limit
+			if ($valuescount > 32 && $valuescount <= 64) {
+				$profilename = "Broadlink." . $deviceident . ".Command1";
+				$profilecounter = 31;
+				$this->CreateBroadlinkWebFrontVariable("WFCommands1", "Command 1", $values, $profilename, $profilecounter);
+			} elseif ($valuescount > 64 && $valuescount <= 96) {
+				$profilename = "Broadlink." . $deviceident . ".Command2";
+				$profilecounter = 63;
+				$this->CreateBroadlinkWebFrontVariable("WFCommands2", "Command 2", $values, $profilename, $profilecounter);
+			} elseif ($valuescount > 96 && $valuescount <= 128) {
+				$profilename = "Broadlink." . $deviceident . ".Command3";
+				$profilecounter = 95;
+				$this->CreateBroadlinkWebFrontVariable("WFCommands3", "Command 3", $values, $profilename, $profilecounter);
+			} elseif ($valuescount > 128 && $valuescount <= 160) {
+				$profilename = "Broadlink." . $deviceident . ".Command4";
+				$profilecounter = 127;
+				$this->CreateBroadlinkWebFrontVariable("WFCommands4", "Command 4", $values, $profilename, $profilecounter);
+			} elseif ($valuescount > 160 && $valuescount <= 192) {
+				$profilename = "Broadlink." . $deviceident . ".Command5";
+				$profilecounter = 159;
+				$this->CreateBroadlinkWebFrontVariable("WFCommands5", "Command 5", $values, $profilename, $profilecounter);
+			} elseif ($valuescount > 192 && $valuescount <= 224) {
+				$profilename = "Broadlink." . $deviceident . ".Command6";
+				$profilecounter = 191;
+				$this->CreateBroadlinkWebFrontVariable("WFCommands6", "Command 6", $values, $profilename, $profilecounter);
+			} else {
+				$profilename = "Broadlink." . $deviceident . ".Command";
+				$profilecounter = 0;
+				$this->CreateBroadlinkWebFrontVariable("WFCommands", "Command", $values, $profilename, $profilecounter);
+			}
 		}
 	}
 
@@ -107,10 +118,33 @@ class BroadlinkDevice extends IPSModule
 		return $wfcommandid;
 	}
 
+	protected function CreateWebFrontVariable($ident, $name, $values, $profilename, $profilecounter)
+	{
+		$wfcommandid = $this->CreateVariableByIdent($this->InstanceID, $ident, $name, 1);
+		$commandass = Array();
+		$profilelimit = $profilecounter + 31;
+		$profilekey = 0;
+		$i = 0;
+		foreach ($values as $key => $value) {
+			if ($i >= $profilecounter && $i <= $profilelimit) {
+				$commandass[$profilekey] = Array($i, $key, "", -1);
+				$profilekey = $profilekey + 1;
+			}
+			$i++;
+			if ($i == $profilelimit) {
+				break;
+			}
+		}
+		$this->SetValue($ident, $profilecounter);
+		$this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, $profilekey, 0, 0, 1, $commandass);
+		IPS_SetVariableCustomProfile($wfcommandid, $profilename);
+		$this->EnableAction($ident);
+		return $wfcommandid;
+	}
+
 	protected function GetCommand($command)
 	{
-		$valuesjson = GetValue($this->GetIDForIdent("Commands"));
-		$values = json_decode($valuesjson, true);
+		$values = $this->GetAvailableCommands();
 		$keyexists = array_key_exists($command, $values);
 		if ($keyexists) {
 			$commandhex = $values[$command];
@@ -122,7 +156,7 @@ class BroadlinkDevice extends IPSModule
 
 	protected function GetCommandName($Ident, $Value)
 	{
-		$deviceident = IPS_GetObject($this->InstanceID)["ObjectIdent"];
+		$deviceident = $this->ReadPropertyString("ident");
 		if ($Ident == "WFCommands") {
 			$profilename = "Broadlink." . $deviceident . ".Command";
 		} elseif ($Ident == "WFCommands1") {
@@ -151,8 +185,198 @@ class BroadlinkDevice extends IPSModule
 
 	public function GetAvailableCommands()
 	{
-		$commands = json_decode(GetValue($this->GetIDForIdent("Commands")), true);
+		$id = @$this->GetIDForIdent("Commands");
+		$ips_version = $this->GetIPSVersion();
+		$commands = [];
+		if($id > 0 && $ips_version < 6)
+		{
+			$this->SendDebug("Broadlink Get Commands:", "Read commands from variable with object id ".$id, 0);
+			$commands = json_decode(GetValue($id), true);
+		}
+		if($ips_version == 6 || $ips_version == 7) // > 5.1
+		{
+			// $this->SendDebug("Broadlink Get Commands:", "Read commands from attribute, IP-Symcon > 5.1 detected", 0);
+			// $commands = json_decode($this->ReadAttributeString("commands"), true);
+			$current_valuesjson = IPS_GetProperty($this->InstanceID, "BroadlinkCommands");
+			$current_values = json_decode($current_valuesjson, true);
+			$commands = [];
+			foreach($current_values as $value)
+			{
+				$commands[$value["key"]] = $value["code"];
+			}
+		}
 		return $commands;
+	}
+
+	protected function SaveCommands($commands)
+	{
+		// Attribute
+		/*
+		$this->WriteAttributeString("commands", json_encode($commands));
+		$this->SetupVariables();
+		 */
+
+		// convert commands to list
+		$list_values = [];
+		foreach($commands as $key => $command)
+		{
+			$list_values[] = ["key" => $key, "code" => $command];
+		}
+		$list_values_json = json_encode($list_values);
+		IPS_SetProperty($this->InstanceID,"BroadlinkCommands", $list_values_json);
+		IPS_ApplyChanges($this->InstanceID);
+	}
+
+	public function ImportCode(string $command_name, string $commandhex)
+	{
+		if ($command_name == "") {
+			$this->SendDebug("Broadlink Learn:", "Empty command name", 0);
+			$result = "Empty command name";
+			return $result;
+		}
+		$values = $this->GetAvailableCommands();
+		$values[$command_name] = $commandhex;
+		$this->SaveCommands($values);
+		return $values;
+	}
+
+	public function ImportCodesText(string $codes)
+	{
+		if($codes == "")
+		{
+			$this->SendDebug("Broadlink Import:", "no import codes selected", 0);
+			return "no import codes selected";
+		}
+		else{
+			$this->SendDebug("Broadlink Import:", "codes: ".$codes, 0);
+			$values = $this->GetAvailableCommands();
+			// add aray to old array, existing values are not overwritten
+			$values = $values + json_decode($codes, true);
+			$this->SaveCommands($values);
+			return $values;
+		}
+	}
+
+	public function ImportCodesVariable(int $variableid)
+	{
+		if($variableid == 0)
+		{
+			$this->SendDebug("Broadlink Import:", "no variable selected", 0);
+			return "no variable selected";
+		}
+		else{
+			$codes = GetValue($variableid);
+			$this->SendDebug("Broadlink Import:", "codes: ".$codes, 0);
+			$values = $this->GetAvailableCommands();
+			// add aray to old array, existing values are not overwritten
+			$values = $values + json_decode($codes, true);
+			$this->SaveCommands($values);
+			return $values;
+		}
+	}
+
+	public function LearnDeviceCode(string $command_name)
+	{
+		$result = $this->LearnDevice($command_name);
+		return $result;
+	}
+
+	public function LearnCommandKey(int $list_number)
+	{
+		$command_name = $this->GetListCommand($list_number);
+		if($command_name != false)
+		{
+			$this->SendDebug("Broadlink Learn:", "learn for command name ".$command_name , 0);
+			$result = $this->LearnDevice($command_name);
+			return $result;
+		}
+		return "could not find command";
+	}
+
+	public function SendCommandKey(int $list_number)
+	{
+		$command_name = $this->GetListCommand($list_number);
+		if($command_name != false)
+		{
+			$this->SendDebug("Broadlink Send:", "send for command name ".$command_name, 0);
+			$this->SendCommand($command_name);
+		}
+	}
+
+	protected function GetListCommand($list_number)
+	{
+		$commands = $this->GetAvailableCommands();
+		$i = 1;
+		foreach ($commands as $key => $command) {
+			if($list_number == $i)
+			{
+				return $key;
+			}
+			$i++;
+		}
+		return false;
+	}
+
+	protected function GetParent()
+	{
+		$instance = IPS_GetInstance($this->InstanceID);
+		return ($instance['ConnectionID'] > 0) ? $instance['ConnectionID'] : false;
+	}
+
+	protected function LearnDevice($command_name)
+	{
+
+		if ($command_name == "") {
+			$this->SendDebug("Broadlink Learn:", "Empty command name", 0);
+			$result = "Empty command name";
+			return $result;
+		}
+
+		$my_parent = $this->GetParent();
+		$devicetype = IPS_GetProperty($my_parent, "devicetype");
+		$name = IPS_GetProperty($my_parent, "name");
+		$mac = IPS_GetProperty($my_parent, "mac");
+		$host = IPS_GetProperty($my_parent, "host");
+		$model = IPS_GetProperty($my_parent, "model");
+
+		$json = array();
+		$info = array("devtype" => $devicetype, "name" => $name, "mac" => $mac, "host" => $host, "model" => $model);
+		$json['code'] = -1;
+		$devtype = Broadlink::getdevtype($info['devtype']);
+		if ($devtype == 2) {
+
+			$rm = Broadlink::CreateDevice($info['host'], $info['mac'], 80, $info['devtype']);
+
+			$rm->Auth();
+			$rm->Enter_learning();
+
+			sleep(10);
+
+			$json['hex'] = $rm->Check_data();
+
+			$json['code'] = 1;
+
+			$json['hex_number'] = '';
+
+			foreach ($json['hex'] as $value) {
+				$json['hex_number'] .= sprintf("%02x", $value);
+			}
+
+			if (strlen($command_name) > 0 && count($json['hex']) > 0) {
+				$values = $this->GetAvailableCommands();
+				$values[$command_name] = $json['hex_number'];
+				$this->SaveCommands($values);
+			}
+		}
+		$result = json_encode($json, JSON_NUMERIC_CHECK);
+		$this->SendDebug("Broadlink Learn:", $result, 0);
+		$this->LogMessage($result, KL_MESSAGE);
+		return $result;
+	}
+
+	protected function SetCommands($commands)
+	{
+		$this->SaveCommands($commands);
 	}
 
 	public function ReceiveData($JSONString)
@@ -160,14 +384,12 @@ class BroadlinkDevice extends IPSModule
 		$data = json_decode($JSONString);
 		$objectident = $data->Buffer->ident;
 		$this->SendDebug("Receive Data:", "Send to Device Ident: " . $objectident, 0);
-		$deviceident = IPS_GetObject($this->InstanceID)["ObjectIdent"];
+		$deviceident = $this->ReadPropertyString("ident");
 		$command = json_encode($data->Buffer->command);
 		$this->SendDebug("Receive Data:", $command, 0);
 		if ($deviceident == $objectident) {
 			$this->SendDebug("Receive Data:", "Data for Device (Ident: " . $deviceident . ")", 0);
-			//Parse and write values to our variables
-			$this->SetValue('Commands', $command);
-			$this->CreateWFVariable($deviceident, $command);
+			$this->SetCommands($command);
 		}
 	}
 
@@ -262,70 +484,307 @@ class BroadlinkDevice extends IPSModule
 
 	}
 
-	//Configuration Form
+	protected function CreateMAC()
+	{
+		$mac = implode(':', str_split(substr(md5(mt_rand()), 0, 12), 2));
+		return $mac;
+	}
+
+	protected function SetIdentifier()
+	{
+		$mac = $this->ReadPropertyString("mac");
+		$this->SendDebug("Bordlink Device:", "mac: ".$mac, 0);
+		if($mac == "")
+		{
+			$name = IPS_GetName($this->InstanceID);
+			IPS_SetProperty($this->InstanceID, "name", $name);
+			$mac = $this->CreateMAC();
+			IPS_SetProperty($this->InstanceID, "mac", $mac);
+			$this->SendDebug("Bordlink Device:", "mac created: ".$mac, 0);
+			$ident = str_replace(":", "_", $mac);
+			IPS_SetProperty($this->InstanceID, "ident", $ident);
+			$this->SendDebug("Bordlink Device:", "ident created: ".$ident, 0);
+			IPS_ApplyChanges($this->InstanceID);
+		}
+	}
+
+	protected function CheckOldInstance()
+	{
+		$id = @$this->GetIDForIdent("Commands");
+		$ips_version = $this->GetIPSVersion();
+		$mac = $this->ReadPropertyString("mac");
+		if($id > 0 && $ips_version >= 6)
+		{
+			$this->SendDebug("Bordlink Device:", "IP-Symcon > 5.1 detected", 0);
+			$this->SendDebug("Bordlink Device:", "converting commands from variable to attribute", 0);
+			$commands = GetValue($id);
+			$this->SaveCommands($commands);
+			$this->UnregisterVariable("Commands");
+			if($mac == "")
+			{
+				$this->SetIdentifier();
+			}
+			$old_instance = false;
+		}
+		elseif($ips_version >= 6)
+		{
+			$this->SendDebug("Bordlink Device:", "IP-Symcon > 5.1 detected", 0);
+			if($mac == "")
+			{
+				$this->SetIdentifier();
+			}
+			$old_instance = false;
+		}
+		else
+		{
+			$old_instance = true;
+		}
+		return $old_instance;
+	}
+
+	/***********************************************************
+	 * Configuration Form
+	 ***********************************************************/
+
+	/**
+	 * build configuration form
+	 * @return string
+	 */
 	public function GetConfigurationForm()
 	{
-		$formhead = $this->FormHead();
-		$formselection = $this->FormSelection();
-		$formstatus = $this->FormStatus();
-		$formactions = $this->FormActions();
-		$formelementsend = '{ "type": "Label", "label": "__________________________________________________________________________________________________" }';
-
-		return '{ ' . $formhead . $formselection . $formelementsend . '],' . $formactions . $formstatus . ' }';
+		// return current form
+		return json_encode([
+			'elements' => $this->FormHead(),
+			'actions' => $this->FormActions(),
+			'status' => $this->FormStatus()
+		]);
 	}
 
-
-	protected function FormSelection()
-	{
-		$form = '';
-		return $form;
-	}
-
+	/**
+	 * return form configurations on configuration step
+	 * @return array
+	 */
 	protected function FormHead()
 	{
+		$this->CheckOldInstance();
 		$commands = $this->GetAvailableCommands();
-
-		$form = '"elements":
-            [
-            { "type": "Label", "label": "available commands" },
-            ';
-		foreach ($commands as $key => $command) {
-			$form .= '{ "type": "Label", "label": "' . $key . '" },';
-		}
-
+		$model = $this->ReadPropertyString("model");
+		$number = count($commands);
+		$form = [
+			[
+				'type' => 'Label',
+				'caption' => 'Broadlink '.$model.' device'
+			],
+			[
+				'type' => 'List',
+				'name' => 'BroadlinkCommands',
+				'caption' => 'available commands',
+				'rowCount' => $number,
+				'add' => true,
+				'delete' => true,
+				'sort' => [
+					'column' => 'key',
+					'direction' => 'ascending'
+				],
+				'columns' => [
+					[
+						'name' => 'key',
+						'caption' => 'key label',
+						'width' => '250px',
+						'visible' => true,
+						'add' => $model.' key label',
+						'edit' => [
+							'type' => 'ValidationTextBox'
+						],
+						'save' => true
+					],
+					[
+						'name' => 'code',
+						'caption' => $model.' code',
+						'width' => 'auto',
+						'visible' => true,
+						'add' => '0',
+						'edit' => [
+							'type' => 'ValidationTextBox'
+						],
+						'save' => true
+					]
+				],
+				'values' => $this->CommandListValues($commands)
+			]
+		];
 		return $form;
 	}
 
+	private function CommandListValues($commands)
+	{
+		$form = [];
+		$number = count($commands);
+		if ($number == 0) {
+			$this->SendDebug("Bordlink Form:", "empty no commands available", 0);
+		} else {
+			foreach ($commands as $key => $command) {
+				$form = array_merge_recursive(
+					$form,
+					[
+						[
+							'key' => $key,
+							'code' => $command
+						]
+					]
+				);
+			}
+		}
+		return $form;
+	}
+
+	/**
+	 * return form actions by token
+	 * @return array
+	 */
 	protected function FormActions()
 	{
-		$form = '"actions":
+		$form = [
 			[
-				
-			],';
-
+				'type' => 'ExpansionPanel',
+				'caption' => 'Import code',
+				'items' => [
+					[
+						'type' => 'Label',
+						'caption' => 'Insert import code:'
+					],
+					[
+						'type' => 'Label',
+						'caption' => 'Format Code JSON: {"Power On":"xxxxx","Power Off":"xxxxx"}'
+					],
+					[
+						'name' => 'importtextfield',
+						'type' => 'ValidationTextBox',
+						'caption' => 'Import Code'
+					],
+					[
+						'type' => 'Button',
+						'caption' => 'Import',
+						'onClick' => 'BroadlinkDevice_ImportCodesText($id, $importtextfield);'
+					],
+					[
+						'type' => 'Label',
+						'caption' => 'or select a variable with commands:'
+					],
+					[
+						'name' => 'importvariable',
+						'type' => 'SelectVariable',
+						'caption' => 'Import Variable'
+					],
+					[
+						'type' => 'Button',
+						'caption' => 'Import',
+						'onClick' => 'BroadlinkDevice_ImportCodesVariable($id, $importvariable);'
+					]
+				]
+			],
+			[
+				'type' => 'ExpansionPanel',
+				'caption' => 'Learn key',
+				'items' => [
+					[
+						'type' => 'Select',
+						'name' => 'learnkey',
+						'caption' => 'key',
+						'options' => $this->GetSendListCommands()
+					],
+					[
+						'type' => 'Button',
+						'caption' => 'Learn',
+						'onClick' => 'BroadlinkDevice_LearnCommandKey($id, $learnkey);'
+					]
+				]
+			],
+			[
+				'type' => 'ExpansionPanel',
+				'caption' => 'Send key',
+				'items' => [
+					[
+						'type' => 'Select',
+						'name' => 'sendkey',
+						'caption' => 'key',
+						'options' => $this->GetSendListCommands()
+					],
+					[
+						'type' => 'Button',
+						'caption' => 'Send',
+						'onClick' => 'BroadlinkDevice_SendCommandKey($id, $sendkey);'
+					]
+				]
+			]
+		];
 		return $form;
 	}
 
+	protected function GetSendListCommands()
+	{
+		$form = [
+			[
+				'label' => 'Please Select',
+				'value' => -1
+			]
+		];
+		$commands = $this->GetAvailableCommands();
+		$i = 1;
+		foreach ($commands as $key => $command) {
+			$form = array_merge_recursive(
+				$form,
+				[
+					[
+						'label' => $key,
+						'value' => $i
+					]
+				]
+			);
+			$i++;
+		}
+		return $form;
+	}
+
+	/**
+	 * return from status
+	 * @return array
+	 */
 	protected function FormStatus()
 	{
-		$form = '"status":
-            [
-                {
-                    "code": 101,
-                    "icon": "inactive",
-                    "caption": "creating instance"
-                },
-				{
-                    "code": 102,
-                    "icon": "active",
-                    "caption": "configuration valid"
-                },
-                {
-                    "code": 104,
-                    "icon": "inactive",
-                    "caption": "Broadlink Device is inactive"
-                }
-            ]';
+		$form = [
+			[
+				'code' => 101,
+				'icon' => 'inactive',
+				'caption' => 'Creating instance.'
+			],
+			[
+				'code' => 102,
+				'icon' => 'active',
+				'caption' => 'Broadlink device created'
+			],
+			[
+				'code' => 104,
+				'icon' => 'inactive',
+				'caption' => 'Broadlink Device is inactive'
+			],
+			[
+				'code' => 201,
+				'icon' => 'inactive',
+				'caption' => 'Please follow the instructions.'
+			],
+			[
+				'code' => 202,
+				'icon' => 'error',
+				'caption' => 'special errorcode.'
+			],
+			[
+				'code' => 203,
+				'icon' => 'error',
+				'caption' => 'No active Broadlink I/O.'
+			]
+		];
+
 		return $form;
 	}
 
@@ -343,14 +802,15 @@ class BroadlinkDevice extends IPSModule
 		return $vid;
 	}
 
-	protected function CreateWFVariables($deviceident, $command)
+	protected function CreateWFVariables($commands)
 	{
-		if ($command == "") {
+		$deviceident = $this->ReadPropertyString("ident");
+		if (empty($commands)) {
 			$this->SendDebug("Command:", "empty", 0);
 		} else {
 			// count commands
-			$values = json_decode($command, true);
-			$valuescount = count($values);
+			$values = $commands;
+			$valuescount = count($commands);
 			// 32 Limit
 			if ($valuescount > 32 && $valuescount <= 64) {
 				$profilename = "Broadlink." . $deviceident . ".Command";
@@ -469,28 +929,6 @@ class BroadlinkDevice extends IPSModule
 		}
 	}
 
-	protected function CreateWebFrontVariable($ident, $name, $values, $profilename, $profilecounter)
-	{
-		$wfcommandid = $this->CreateVariableByIdent($this->InstanceID, $ident, $name, 1);
-		$commandass = Array();
-		$profilelimit = $profilecounter + 31;
-		$profilekey = 0;
-		$i = 0;
-		foreach ($values as $key => $value) {
-			if ($i >= $profilecounter && $i <= $profilelimit) {
-				$commandass[$profilekey] = Array($i, $key, "", -1);
-				$profilekey = $profilekey + 1;
-			}
-			$i++;
-			if ($i == $profilelimit) {
-				break;
-			}
-		}
-		$this->RegisterProfileAssociation($profilename, "Execute", "", "", 0, $profilekey, 0, 0, 1, $commandass);
-		IPS_SetVariableCustomProfile($wfcommandid, $profilename);
-		$this->EnableAction($ident);
-		return $wfcommandid;
-	}
 
 	//Add this Polyfill for IP-Symcon 4.4 and older
 	protected function SetValue($Ident, $Value)
@@ -502,6 +940,38 @@ class BroadlinkDevice extends IPSModule
 			SetValue($this->GetIDForIdent($Ident), $Value);
 		}
 	}
-}
 
-?>
+	private function GetIPSVersion()
+	{
+		$ipsversion = floatval(IPS_GetKernelVersion());
+		if ($ipsversion < 4.1) // 4.0
+		{
+			$ipsversion = 0;
+		} elseif ($ipsversion >= 4.1 && $ipsversion < 4.2) // 4.1
+		{
+			$ipsversion = 1;
+		} elseif ($ipsversion >= 4.2 && $ipsversion < 4.3) // 4.2
+		{
+			$ipsversion = 2;
+		} elseif ($ipsversion >= 4.3 && $ipsversion < 4.4) // 4.3
+		{
+			$ipsversion = 3;
+		} elseif ($ipsversion >= 4.4 && $ipsversion < 5) // 4.4
+		{
+			$ipsversion = 4;
+		}
+		elseif ($ipsversion >= 5.0 && $ipsversion < 5.1) // 5.0
+		{
+			$ipsversion = 5;
+		}
+		elseif ($ipsversion >= 5.1 && $ipsversion < 5.2) // 5.1
+		{
+			$ipsversion = 6;
+		}else   // > 5.1
+		{
+			$ipsversion = 7;
+		}
+
+		return $ipsversion;
+	}
+}

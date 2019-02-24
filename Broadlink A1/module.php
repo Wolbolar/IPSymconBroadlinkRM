@@ -19,7 +19,7 @@ class BroadlinkA1 extends IPSModule
 		$this->RegisterPropertyString("name", "");
 		$this->RegisterPropertyString("host", "");
 		$this->RegisterPropertyString("mac", "");
-		$this->RegisterPropertyString("modell", "");
+		$this->RegisterPropertyString("model", "");
 		$this->RegisterPropertyString("devicetype", "");
 		$this->RegisterVariableFloat("Temperature", "Temperatur", "~Temperature");
 		$this->RegisterVariableFloat("Humidity", "Feuchtigkeit", "~Humidity.F");
@@ -50,16 +50,43 @@ class BroadlinkA1 extends IPSModule
 		$this->RegisterVariableInteger("Air_quality", "Luftqualität", "Broadlink.A1.Airquality");
 		$this->RegisterVariableInteger("Noise", "Lautstärke", "Broadlink.A1.Noise");
 		$this->RegisterTimer('A1Update', 0, 'BroadlinkA1_TimerUpdateData(' . $this->InstanceID . ');');
+
+		//we will wait until the kernel is ready
+		$this->RegisterMessage(0, IPS_KERNELMESSAGE);
 	}
 
 	public function ApplyChanges()
 	{
 		//Never delete this line!
 		parent::ApplyChanges();
-		// $change = false;
+
+		if (IPS_GetKernelRunlevel() !== KR_READY) {
+			return;
+		}
 
 		$this->SetStatus(102);
 		$this->SetA1Interval();
+	}
+
+	public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+	{
+
+		switch ($Message) {
+			case IM_CHANGESTATUS:
+				if ($Data[0] === IS_ACTIVE) {
+					$this->ApplyChanges();
+				}
+				break;
+
+			case IPS_KERNELMESSAGE:
+				if ($Data[0] === KR_READY) {
+					$this->ApplyChanges();
+				}
+				break;
+
+			default:
+				break;
+		}
 	}
 
 	/**
@@ -85,7 +112,8 @@ class BroadlinkA1 extends IPSModule
 		$data = json_decode($JSONString);
 		$objectident = $data->Buffer->ident;
 		$this->SendDebug("Receive Data:", "Send to A1 Ident: " . $objectident, 0);
-		$a1ident = IPS_GetObject($this->InstanceID)["ObjectIdent"];
+		$mac = $this->ReadPropertyString("mac");
+		$a1ident =  str_replace(":", "_", $mac);
 		$devicejson = json_encode($data->Buffer->device);
 		$this->SendDebug("Receive Data:", $devicejson, 0);
 		if ($a1ident == $objectident) {
@@ -101,7 +129,7 @@ class BroadlinkA1 extends IPSModule
 		$type = $device["devtype"];
 		$host = $device["host"];
 		$mac = $device["mac"];
-		$modell = $device["model"];
+		$model = $device["model"];
 		$name = $device["name"];
 		if (isset($device["temperature"])) {
 			$temperature = floatval($device["temperature"]);
@@ -150,8 +178,8 @@ class BroadlinkA1 extends IPSModule
 		$this->SendDebug("Broadlink A1:", "Host " . $host, 0);
 		IPS_SetProperty($this->InstanceID, "mac", $mac);
 		$this->SendDebug("Broadlink A1:", "Mac " . $mac, 0);
-		IPS_SetProperty($this->InstanceID, "modell", $modell);
-		$this->SendDebug("Broadlink A1:", "Model " . $modell, 0);
+		IPS_SetProperty($this->InstanceID, "model", $model);
+		$this->SendDebug("Broadlink A1:", "Model " . $model, 0);
 		IPS_SetProperty($this->InstanceID, "devicetype", $type);
 		$this->SendDebug("Broadlink A1:", "Device type " . $type, 0);
 		IPS_ApplyChanges($this->InstanceID); //Neue Konfiguration übernehmen
@@ -159,7 +187,8 @@ class BroadlinkA1 extends IPSModule
 
 	public function Update()
 	{
-		$deviceident = IPS_GetObject($this->InstanceID)["ObjectIdent"];
+		$mac = $this->ReadPropertyString("mac");
+		$deviceident =  str_replace(":", "_", $mac);
 		$payload = array("name" => $deviceident, "command" => "UpdateA1");
 		$this->SendDebug("Send Data:", json_encode($payload), 0);
 
@@ -190,127 +219,188 @@ class BroadlinkA1 extends IPSModule
 		return false;
 	}
 
+	/***********************************************************
+	 * Configuration Form
+	 ***********************************************************/
 
-	//Configuration Form
+	/**
+	 * build configuration form
+	 * @return string
+	 */
 	public function GetConfigurationForm()
 	{
-		$formhead = $this->FormHead();
-		$formselection = $this->FormSelection();
-		$formstatus = $this->FormStatus();
-		$formactions = $this->FormActions();
-		$formelementsend = '{ "type": "Label", "label": "__________________________________________________________________________________________________" }';
-
-		return '{ ' . $formhead . $formselection . $formelementsend . '],' . $formactions . $formstatus . ' }';
+		// return current form
+		return json_encode([
+			'elements' => $this->FormHead(),
+			'actions' => $this->FormActions(),
+			'status' => $this->FormStatus()
+		]);
 	}
 
-
-	protected function FormSelection()
-	{
-		$form = '';
-		return $form;
-	}
-
+	/**
+	 * return form configurations on configuration step
+	 * @return array
+	 */
 	protected function FormHead()
 	{
 		$mac = $this->ReadPropertyString("mac");
-		if ($mac == "") {
-			$form = '"elements":
-            [
-				{ "type": "Label", "label": "This device is created by the Broadlink gateway, please go to the Broadlink gateway and press Discover" },';
-		} else {
-			$form = '"elements":
-            [
-				{ "type": "Label", "label": "Broadlink" },
-				{ "type": "Label", "label": "Broadlink A1 update interval" },
-				{
-					"name": "a1interval",
-					"type": "IntervalBox",
-					"caption": "minutes"
-				},
-				{ "type": "Label", "label": "Broadlink Name" },
-				{
-					"name": "name",
-					"type": "ValidationTextBox",
-					"caption": "Name"
-				},
-				{ "type": "Label", "label": "Broadlink IP address" },
-				{
-					"name": "host",
-					"type": "ValidationTextBox",
-					"caption": "IP address"
-				},
-				{ "type": "Label", "label": "Broadlink MAC address" },
-				{
-					"name": "mac",
-					"type": "ValidationTextBox",
-					"caption": "MAC address"
-				},
-				{ "type": "Label", "label": "Broadlink Modell" },
-				{
-					"name": "modell",
-					"type": "ValidationTextBox",
-					"caption": "Modell"
-				},
-				{ "type": "Label", "label": "Broadlink Device type" },
-				{
-					"name": "devicetype",
-					"type": "ValidationTextBox",
-					"caption": "Device type"
-				},';
+		if($mac == "")
+		{
+			$form = [
+				[
+					'type' => 'Label',
+					'caption' => 'This device is created by the Broadlink configurator, please go to the Broadlink configurator and press Discover'
+				]
+			];
+		}
+		else
+		{
+			$form = [
+				[
+					'type' => 'Label',
+					'caption' => 'Broadlink'
+				],
+				[
+					'type' => 'Label',
+					'caption' => 'Broadlink A1 update interval'
+				],
+				[
+					'name' => 'a1interval',
+					'type' => 'IntervalBox',
+					'caption' => 'minutes'
+				],
+				[
+					'type' => 'List',
+					'name' => 'BroadlinkInformation',
+					'caption' => 'Broadlink information',
+					'rowCount' => 2,
+					'add' => false,
+					'delete' => false,
+					'sort' => [
+						'column' => 'host',
+						'direction' => 'ascending'
+					],
+					'columns' => [
+						[
+							'name' => 'name',
+							'caption' => 'Name',
+							'width' => '370px',
+							'visible' => true
+						],
+						[
+							'name' => 'host',
+							'caption' => 'IP address',
+							'width' => '150px',
+						],
+						[
+							'name' => 'mac',
+							'caption' => 'MAC address',
+							'width' => '150px',
+						],
+						[
+							'name' => 'model',
+							'caption' => 'Model',
+							'width' => 'auto',
+						],
+						[
+							'name' => 'devicetype',
+							'caption' => 'Device type',
+							'width' => '150px',
+						]
+					],
+					'values' => [
+						[
+							'name' => $this->ReadPropertyString("name"),
+							'host' => $this->ReadPropertyString("host"),
+							'mac' => $this->ReadPropertyString("mac"),
+							'model' => $this->ReadPropertyString("model"),
+							'devicetype' => $this->ReadPropertyString("devicetype")
+						]]
+				]
+			];
 		}
 		return $form;
 	}
 
+	/**
+	 * return form actions by token
+	 * @return array
+	 */
 	protected function FormActions()
 	{
 		$mac = $this->ReadPropertyString("mac");
 		if ($mac == "") {
-			$form = '"actions":
-			[
-				{ "type": "Label", "label": "Discover Device" },
-				{ "type": "Button", "label": "Discover", "onClick": "BroadlinkA1_Update($id);" }
-			],';
+			$form = [
+				[
+					'type' => 'Label',
+					'caption' => 'Discover Device'
+				],
+				[
+					'type' => 'Button',
+					'caption' => 'Discover',
+					'onClick' => 'BroadlinkA1_Update($id);'
+				]
+			];
 		} else {
-			$form = '"actions":
-			[
-				{ "type": "Label", "label": "Update data" },
-				{ "type": "Button", "label": "Update", "onClick": "BroadlinkA1_Update($id);" }
-			],';
+			$form = [
+				[
+					'type' => 'Label',
+					'caption' => 'Update data'
+				],
+				[
+					'type' => 'Button',
+					'caption' => 'Update',
+					'onClick' => 'BroadlinkA1_Update($id);'
+				]
+			];
 		}
-
 		return $form;
 	}
 
+	/**
+	 * return from status
+	 * @return array
+	 */
 	protected function FormStatus()
 	{
-		$form = '"status":
-            [
-                {
-                    "code": 101,
-                    "icon": "inactive",
-                    "caption": "Creating instance."
-                },
-				{
-                    "code": 203,
-                    "icon": "error",
-                    "caption": "No active Broadlink I/O."
-                },
-				{
-                    "code": 102,
-                    "icon": "active",
-                    "caption": "Broadlink A1 created."
-                },
-                {
-                    "code": 104,
-                    "icon": "inactive",
-                    "caption": "Interface closed."
-                },
-                {
-                    "code": 211,
-                    "icon": "error",
-                    "caption": "choose category for Broadlink devices."
-                }
-            ]';
+		$form = [
+			[
+				'code' => 101,
+				'icon' => 'inactive',
+				'caption' => 'Creating instance.'
+			],
+			[
+				'code' => 102,
+				'icon' => 'active',
+				'caption' => 'Broadlink A1 created.'
+			],
+			[
+				'code' => 104,
+				'icon' => 'inactive',
+				'caption' => 'Interface closed.'
+			],
+			[
+				'code' => 201,
+				'icon' => 'inactive',
+				'caption' => 'Please follow the instructions.'
+			],
+			[
+				'code' => 202,
+				'icon' => 'error',
+				'caption' => 'special errorcode.'
+			],
+			[
+				'code' => 203,
+				'icon' => 'error',
+				'caption' => 'No active Broadlink I/O.'
+			],
+			[
+				'code' => 211,
+				'icon' => 'error',
+				'caption' => 'choose category for Broadlink devices.'
+			]
+		];
+
 		return $form;
 	}
 
@@ -356,6 +446,40 @@ class BroadlinkA1 extends IPSModule
 		} else {
 			SetValue($this->GetIDForIdent($Ident), $Value);
 		}
+	}
+
+	private function GetIPSVersion()
+	{
+		$ipsversion = floatval(IPS_GetKernelVersion());
+		if ($ipsversion < 4.1) // 4.0
+		{
+			$ipsversion = 0;
+		} elseif ($ipsversion >= 4.1 && $ipsversion < 4.2) // 4.1
+		{
+			$ipsversion = 1;
+		} elseif ($ipsversion >= 4.2 && $ipsversion < 4.3) // 4.2
+		{
+			$ipsversion = 2;
+		} elseif ($ipsversion >= 4.3 && $ipsversion < 4.4) // 4.3
+		{
+			$ipsversion = 3;
+		} elseif ($ipsversion >= 4.4 && $ipsversion < 5) // 4.4
+		{
+			$ipsversion = 4;
+		}
+		elseif ($ipsversion >= 5.0 && $ipsversion < 5.1) // 5.0
+		{
+			$ipsversion = 5;
+		}
+		elseif ($ipsversion >= 5.1 && $ipsversion < 5.2) // 5.1
+		{
+			$ipsversion = 6;
+		}else   // > 5.1
+		{
+			$ipsversion = 7;
+		}
+
+		return $ipsversion;
 	}
 }
 

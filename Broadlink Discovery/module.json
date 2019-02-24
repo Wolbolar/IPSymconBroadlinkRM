@@ -1,0 +1,13 @@
+{
+  "id": "{2339DAEF-E9A6-E37C-2B7C-F64F22872468}",
+  "name": "BroadlinkDiscovery",
+  "type": 5,
+  "vendor": "Broadlink",
+  "aliases": [
+    "Broadlink Discovery"
+  ],
+  "parentRequirements": [],
+  "childRequirements": [],
+  "implemented": [],
+  "prefix": "BroadlinkDiscovery"
+}

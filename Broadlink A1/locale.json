@@ -1,7 +1,7 @@
 {
 	"translations": {
 		"de": { 
-			"This device is created by the Broadlink gateway, please go to the Broadlink gateway and press Discover": "Dieses gerät wird automatisch vom Broadlink I/O angelegt, bitte den Broadlink I/O öffnen und Discover drücken",
+			"This device is created by the Broadlink configurator, please go to the Broadlink configurator and press Discover": "Dieses Gerät wird vom Broadlink Konfigurator angelegt, bitte zum Broadlink Konfigurator wechseln und dort das Gerät anlegen",
 			"Update data": "Daten aktualisieren",
 			"Update": "Aktualisieren",
 			"IP address": "IP Adresse",
@@ -11,7 +11,7 @@
 			"Broadlink MAC address": "Broadlink MAC Adresse",
 			"Broadlink Modell": "Broadlink Modell",
 			"Broadlink Device type": "Broadlink Geräte Typ",
-			"Modell": "Model",
+			"Model": "Modell",
 			"Device type": "Geräte Typ",
 			"Creating instance.": "Die Instanz wird erstellt.",
 			"No active Broadlink I/O.":"Kein aktiver Broadlink I/O",
