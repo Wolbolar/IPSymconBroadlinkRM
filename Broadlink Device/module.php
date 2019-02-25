@@ -18,7 +18,7 @@ class BroadlinkDevice extends IPSModule
 		$this->RegisterPropertyString("devicetype", "");
 		$this->RegisterPropertyString("model", "");
 		$this->RegisterAttributeString("commands", "[]");
-		$this->RegisterPropertyString("BroadlinkCommands", "");
+		$this->RegisterPropertyString("BroadlinkCommands", "[]");
 	}
 
 	public function ApplyChanges()
@@ -570,49 +570,67 @@ class BroadlinkDevice extends IPSModule
 		$commands = $this->GetAvailableCommands();
 		$model = $this->ReadPropertyString("model");
 		$number = count($commands);
-		$form = [
-			[
-				'type' => 'Label',
-				'caption' => 'Broadlink '.$model.' device'
-			],
-			[
-				'type' => 'List',
-				'name' => 'BroadlinkCommands',
-				'caption' => 'available commands',
-				'rowCount' => $number,
-				'add' => true,
-				'delete' => true,
-				'sort' => [
-					'column' => 'key',
-					'direction' => 'ascending'
-				],
-				'columns' => [
+		$form = [];
+		if ($model == "") {
+			$form = array_merge_recursive(
+				$form,
+				[
 					[
-						'name' => 'key',
-						'caption' => 'key label',
-						'width' => '250px',
-						'visible' => true,
-						'add' => $model.' key label',
-						'edit' => [
-							'type' => 'ValidationTextBox'
-						],
-						'save' => true
+						'type' => 'Label',
+						'caption' => 'This device should be created by the broadlink configurator, please open the Broadlink configurator and create the device there.'
+					]
+				]
+			);
+		}
+		else
+		{
+			$form = array_merge_recursive(
+				$form,
+				[
+					[
+						'type' => 'Label',
+						'caption' => 'Broadlink '.$model.' device'
 					],
 					[
-						'name' => 'code',
-						'caption' => $model.' code',
-						'width' => 'auto',
-						'visible' => true,
-						'add' => '0',
-						'edit' => [
-							'type' => 'ValidationTextBox'
+						'type' => 'List',
+						'name' => 'BroadlinkCommands',
+						'caption' => 'available commands',
+						'rowCount' => $number,
+						'add' => true,
+						'delete' => true,
+						'sort' => [
+							'column' => 'key',
+							'direction' => 'ascending'
 						],
-						'save' => true
+						'columns' => [
+							[
+								'name' => 'key',
+								'caption' => 'key label',
+								'width' => '250px',
+								'visible' => true,
+								'add' => $model.' key label',
+								'edit' => [
+									'type' => 'ValidationTextBox'
+								],
+								'save' => true
+							],
+							[
+								'name' => 'code',
+								'caption' => $model.' code',
+								'width' => 'auto',
+								'visible' => true,
+								'add' => '0',
+								'edit' => [
+									'type' => 'ValidationTextBox'
+								],
+								'save' => true
+							]
+						],
+						'values' => $this->CommandListValues($commands)
 					]
-				],
-				'values' => $this->CommandListValues($commands)
-			]
-		];
+				]
+			);
+		}
 		return $form;
 	}
 
@@ -644,80 +662,91 @@ class BroadlinkDevice extends IPSModule
 	 */
 	protected function FormActions()
 	{
-		$form = [
-			[
-				'type' => 'ExpansionPanel',
-				'caption' => 'Import code',
-				'items' => [
+		$model = $this->ReadPropertyString("model");
+		$form = [];
+		if ($model == "") {
+			$this->SendDebug("Form Actions:", "empty", 0);
+		}
+		else
+		{
+			$form = array_merge_recursive(
+				$form,
+				[
 					[
-						'type' => 'Label',
-						'caption' => 'Insert import code:'
+						'type' => 'ExpansionPanel',
+						'caption' => 'Import code',
+						'items' => [
+							[
+								'type' => 'Label',
+								'caption' => 'Insert import code:'
+							],
+							[
+								'type' => 'Label',
+								'caption' => 'Format Code JSON: {"Power On":"xxxxx","Power Off":"xxxxx"}'
+							],
+							[
+								'name' => 'importtextfield',
+								'type' => 'ValidationTextBox',
+								'caption' => 'Import Code'
+							],
+							[
+								'type' => 'Button',
+								'caption' => 'Import',
+								'onClick' => 'BroadlinkDevice_ImportCodesText($id, $importtextfield);'
+							],
+							[
+								'type' => 'Label',
+								'caption' => 'or select a variable with commands:'
+							],
+							[
+								'name' => 'importvariable',
+								'type' => 'SelectVariable',
+								'caption' => 'Import Variable'
+							],
+							[
+								'type' => 'Button',
+								'caption' => 'Import',
+								'onClick' => 'BroadlinkDevice_ImportCodesVariable($id, $importvariable);'
+							]
+						]
 					],
 					[
-						'type' => 'Label',
-						'caption' => 'Format Code JSON: {"Power On":"xxxxx","Power Off":"xxxxx"}'
+						'type' => 'ExpansionPanel',
+						'caption' => 'Learn key',
+						'items' => [
+							[
+								'type' => 'Select',
+								'name' => 'learnkey',
+								'caption' => 'key',
+								'options' => $this->GetSendListCommands()
+							],
+							[
+								'type' => 'Button',
+								'caption' => 'Learn',
+								'onClick' => 'BroadlinkDevice_LearnCommandKey($id, $learnkey);'
+							]
+						]
 					],
 					[
-						'name' => 'importtextfield',
-						'type' => 'ValidationTextBox',
-						'caption' => 'Import Code'
-					],
-					[
-						'type' => 'Button',
-						'caption' => 'Import',
-						'onClick' => 'BroadlinkDevice_ImportCodesText($id, $importtextfield);'
-					],
-					[
-						'type' => 'Label',
-						'caption' => 'or select a variable with commands:'
-					],
-					[
-						'name' => 'importvariable',
-						'type' => 'SelectVariable',
-						'caption' => 'Import Variable'
-					],
-					[
-						'type' => 'Button',
-						'caption' => 'Import',
-						'onClick' => 'BroadlinkDevice_ImportCodesVariable($id, $importvariable);'
+						'type' => 'ExpansionPanel',
+						'caption' => 'Send key',
+						'items' => [
+							[
+								'type' => 'Select',
+								'name' => 'sendkey',
+								'caption' => 'key',
+								'options' => $this->GetSendListCommands()
+							],
+							[
+								'type' => 'Button',
+								'caption' => 'Send',
+								'onClick' => 'BroadlinkDevice_SendCommandKey($id, $sendkey);'
+							]
+						]
 					]
 				]
-			],
-			[
-				'type' => 'ExpansionPanel',
-				'caption' => 'Learn key',
-				'items' => [
-					[
-						'type' => 'Select',
-						'name' => 'learnkey',
-						'caption' => 'key',
-						'options' => $this->GetSendListCommands()
-					],
-					[
-						'type' => 'Button',
-						'caption' => 'Learn',
-						'onClick' => 'BroadlinkDevice_LearnCommandKey($id, $learnkey);'
-					]
-				]
-			],
-			[
-				'type' => 'ExpansionPanel',
-				'caption' => 'Send key',
-				'items' => [
-					[
-						'type' => 'Select',
-						'name' => 'sendkey',
-						'caption' => 'key',
-						'options' => $this->GetSendListCommands()
-					],
-					[
-						'type' => 'Button',
-						'caption' => 'Send',
-						'onClick' => 'BroadlinkDevice_SendCommandKey($id, $sendkey);'
-					]
-				]
-			]
-		];
+			);
+		}
 		return $form;
 	}
 

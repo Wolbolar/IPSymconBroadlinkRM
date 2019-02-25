@@ -1,8 +1,10 @@
 {
 	"translations": {
 		"de": { 
+			"This device should be created by the broadlink configurator, please open the Broadlink configurator and create the device there.": "Dieses Gerät soll über den Broadlink Konfigurator erzeugt werden. Bitte den Broadlink Konfigurator öffnen und dort eine neue Geräteinstanz erzeugen.",
 			"Broadlink RF device": "Broadlink RF Gerät",
 			"Broadlink IR device": "Broadlink IR Gerät",
+			"Broadlink device": "Broadlink Gerät",
 			"Broadlink Import:": "Broadlink Import:",
 			"Insert import code:": "Import Code einfügen",
 			"Import Code": "Import Code",
@@ -20,6 +22,7 @@
 			"RF Code": "RF Code",
 			"Please Select": "Bitte auswählen",
 			"key": "Befehl",
+			"code": "Code",
 			"Import": "Importieren",
 			"available commands": "Verfügbare Befehle:",
 			"Broadlink device name": "Broadlink Geräte Name",

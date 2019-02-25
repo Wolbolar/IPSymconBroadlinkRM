@@ -468,8 +468,6 @@ class BroadlinkConfigurator extends IPSModule
 	 */
 	protected function FormHead()
 	{
-		$category = false;
-
 		$form = [
 			[
 				'type' => 'Label',
@@ -540,21 +538,6 @@ class BroadlinkConfigurator extends IPSModule
 				'values' => $this->Get_ListConfiguration()
 			]
 		];
-
-		if ($category) {
-			$form = array_merge_recursive(
-				$form,
-				[
-					[
-						'name' => 'script_category',
-						'type' => 'SelectCategory',
-						'caption' => 'Script category'
-					]
-				]
-			);
-		}
-
-
 		return $form;
 	}
 
