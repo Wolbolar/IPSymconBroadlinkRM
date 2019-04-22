@@ -754,7 +754,7 @@ class BroadlinkDevice extends IPSModule
 	{
 		$form = [
 			[
-				'label' => 'Please Select',
+				'caption' => 'Please Select',
 				'value' => -1
 			]
 		];
@@ -765,7 +765,7 @@ class BroadlinkDevice extends IPSModule
 				$form,
 				[
 					[
-						'label' => $key,
+						'caption' => $key,
 						'value' => $i
 					]
 				]
