@@ -43,10 +43,8 @@ class BroadlinkConfigurator extends IPSModule
 			return;
 		}
 
-		$ParentID = $this->GetParent();
-
 		// Wenn I/O verbunden ist
-		if ($this->HasActiveParent($ParentID)) {
+		if ($this->HasActiveParent()) {
 			$this->SendDebug("Broadlink:", "Parent active", 0);
 		}
 
@@ -66,19 +64,6 @@ class BroadlinkConfigurator extends IPSModule
 	{
 		$instance = IPS_GetInstance($this->InstanceID);
 		return ($instance['ConnectionID'] > 0) ? $instance['ConnectionID'] : false;
-	}
-
-	protected function HasActiveParent($ParentID)
-	{
-		if ($ParentID > 0) {
-			$parent = IPS_GetInstance($ParentID);
-			if ($parent['InstanceStatus'] == 102) {
-				$this->SetStatus(102);
-				return true;
-			}
-		}
-		$this->SetStatus(203);
-		return false;
 	}
 
 	public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
@@ -334,7 +319,7 @@ class BroadlinkConfigurator extends IPSModule
 		$io_model = $this->ReadPropertyString("io_model");
 		// $io_name = $this->ReadPropertyString("io_name");
 		$io_host = $this->ReadPropertyString("io_host");
-		$io_mac = $this->ReadPropertyString("io_mac");
+		// $io_mac = $this->ReadPropertyString("io_mac");
 		$MyParent = $this->GetParent();
 		$devices_json = $this->ReadPropertyString("broadlink_devices");
 		$this->SendDebug('Broadlink discovered devices', $devices_json, 0);
@@ -547,7 +532,7 @@ class BroadlinkConfigurator extends IPSModule
 	 */
 	protected function FormActions()
 	{
-		$MyParent = IPS_GetInstance($this->InstanceID)['ConnectionID'];
+		// $MyParent = IPS_GetInstance($this->InstanceID)['ConnectionID'];
 		$form = [
 			[
 				'type' => 'ExpansionPanel',
