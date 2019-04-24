@@ -172,7 +172,9 @@ class BroadlinkDiscovery extends IPSModule
 	public function Discover()
 	{
 		$this->LogMessage($this->Translate('Background Discovery of Broadlink Devices'), KL_NOTIFY);
-		$this->WriteAttributeString("devices", json_encode($this->DiscoverDevices()));
+		$result = $this->DiscoverDevices();
+		$this->WriteAttributeString("devices", json_encode($result));
+		return $result;
 	}
 
 	/***********************************************************
