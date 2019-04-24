@@ -63,9 +63,11 @@ class BroadlinkA1 extends IPSModule
 		if (IPS_GetKernelRunlevel() !== KR_READY) {
 			return;
 		}
-
-		$this->SetStatus(102);
-		$this->SetA1Interval();
+		if($this->HasActiveParent())
+		{
+			$this->SetStatus(102);
+			$this->SetA1Interval();
+		}
 	}
 
 	public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
@@ -204,19 +206,6 @@ class BroadlinkA1 extends IPSModule
 	{
 		$instance = IPS_GetInstance($this->InstanceID);
 		return ($instance['ConnectionID'] > 0) ? $instance['ConnectionID'] : false;
-	}
-
-	protected function HasActiveParent($ParentID)
-	{
-		if ($ParentID > 0) {
-			$parent = IPS_GetInstance($ParentID);
-			if ($parent['InstanceStatus'] == 102) {
-				$this->SetStatus(102);
-				return true;
-			}
-		}
-		$this->SetStatus(203);
-		return false;
 	}
 
 	/***********************************************************
