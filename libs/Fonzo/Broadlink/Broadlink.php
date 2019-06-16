@@ -336,6 +336,18 @@ class Broadlink
 
 	public static function Discover()
 	{
+		$devices = Broadlink::DiscoverDevices("255.255.255.255");
+		return $devices;
+	}
+
+	public static function DiscoverDevice($ip)
+	{
+		$devices = Broadlink::DiscoverDevices($ip);
+		return $devices;
+	}
+
+	private static function DiscoverDevices($ip)
+	{
 
 		$devices = array();
 
@@ -400,7 +412,7 @@ class Broadlink
 		$packet[0x20] = $checksum & 0xff;
 		$packet[0x21] = $checksum >> 8;
 
-		socket_sendto($cs, self::byte($packet), sizeof($packet), 0, "255.255.255.255", 80);
+		socket_sendto($cs, self::byte($packet), sizeof($packet), 0, $ip, 80);
 		set_error_handler(function () { /* ignore errors */
 		}); // ignore warning
 		while (socket_recvfrom($cs, $response, 1024, 0, $from, $port)) {

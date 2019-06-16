@@ -163,6 +163,31 @@ class BroadlinkDiscovery extends IPSModule
 		return $result;
 	}
 
+	private function DiscoverDevice($ip): array
+	{
+		$result = array();
+
+		$devices = Broadlink::DiscoverDevice($ip);
+		$this->SendDebug("Discover Response:", json_encode($devices), 0);
+		foreach ($devices as $device) {
+
+			$obj = array();
+
+			$obj['devtype'] = $device->devtype();
+			$this->SendDebug("devtype:", $obj['devtype'], 0);
+			$obj['name'] = $device->name();
+			$this->SendDebug("name:", $obj['name'], 0);
+			$obj['mac'] = $device->mac();
+			$this->SendDebug("mac:", $obj['mac'], 0);
+			$obj['host'] = $device->host();
+			$this->SendDebug("host:", $obj['host'], 0);
+			$obj['model'] = $device->model();
+			$this->SendDebug("model:", $obj['model'], 0);
+			array_push($result, $obj);
+		}
+		return $result;
+	}
+
 	public function GetDevices()
 	{
 		$devices = $this->ReadPropertyString("devices");
@@ -172,7 +197,16 @@ class BroadlinkDiscovery extends IPSModule
 	public function Discover()
 	{
 		$this->LogMessage($this->Translate('Background Discovery of Broadlink Devices'), KL_NOTIFY);
-		$this->WriteAttributeString("devices", json_encode($this->DiscoverDevices()));
+		$result = $this->DiscoverDevices();
+		$this->WriteAttributeString("devices", json_encode($result));
+		return $result;
+	}
+
+	public function GetDeviceInfo(string $ip)
+	{
+		$deviceinfo = $this->DiscoverDevice($ip);
+		// $this->WriteAttributeString("devices", json_encode($result));
+		return $deviceinfo;
 	}
 
 	/***********************************************************

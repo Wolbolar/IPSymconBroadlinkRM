@@ -159,7 +159,7 @@ Dazu legt man ein Skript im Objektbaum an und kopiert diesen Inhalt in das Skrip
 <?
 $InstanceID = 12345; // Objekt ID der Broadlink Instanz, an die ein Befehl angelernt werden soll
 $command_name = "Power";
-$result = Broadlink_LearnDeviceCode($InstanceID, $command_name);
+$result = BroadlinkDevice_LearnDeviceCode($InstanceID, $command_name);
 var_dump($result);
 ?>
 ```   
@@ -201,7 +201,7 @@ Wenn bereits ein Code von Broadlink bekannt ist muss nicht erneut direkt am Broa
 $command_name = "PowerOff";
 $command = "b20834000c250b250c250c250c250c240c250c250c250c250c240c250b250c240c240c240c250c240c24240e0c25230e0c250c250c00017500000000";
 $InstanceID = 12345; // Objekt ID der Broadlink Instanz, an die ein Befehl angelernt werden soll
-$iid = Broadlink_ImportCode($InstanceID, $command_name, $command);
+$iid = BroadlinkDevice_ImportCode($InstanceID, $command_name, $command);
 var_dump($iid);
 ?>
 ```   
@@ -245,7 +245,7 @@ Ein Gerät wird mit der entsprechenden Funktion und Übergabe der InstanzID ange
 _**Anlernen**_
  
 ```php
-Broadlink_LearnDeviceCode($InstanceID, $command_name);
+BroadlinkDevice_LearnDeviceCode($InstanceID, $command_name);
 ```   
 
 Parameter _$command_name_ __*Befehlsname*__ unter der der Code abgelegt wird und dann wieder aufgerufen werden kann z.B. _Power_
@@ -255,7 +255,7 @@ Parameter _$InstanceID_ __*ObjektID*__ der Broadlink Instanz
 _**Importieren von existierenden Codes**_
 
 ```php
-Broadlink_ImportCode($InstanceID, $command_name, $command);
+BroadlinkDevice_ImportCode($InstanceID, $command_name, $command);
 ```   
 
 Parameter _$command_name_ __*Befehlsname*__ unter der der Code abgelegt wird und dann wieder aufgerufen werden kann z.B. Power
