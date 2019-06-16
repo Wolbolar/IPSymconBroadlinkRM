@@ -155,7 +155,7 @@ To do this, create a script in the object tree and copy this content into the sc
 <?
 $InstanceID = 12345; // Object ID of the Broadlink instance to which a command is to be trained
 $command_name = "Power";
-$result = Broadlink_LearnDeviceCode($InstanceID, $command_name);
+$result = BroadlinkDevice_LearnDeviceCode($InstanceID, $command_name);
 var_dump($result);
 ?>
 ```   
@@ -198,7 +198,7 @@ If a code from Broadlink is already known, there is no need to train again direc
 $command_name = "PowerOff";
 $command = "b20834000c250b250c250c250c250c240c250c250c250c250c240c250b250c240c240c240c250c240c24240e0c25230e0c250c250c00017500000000";
 $InstanceID = 12345; // Object ID of the Broadlink instance to which a command is to be trained
-$result = Broadlink_ImportCode($InstanceID, $command_name, $command);
+$result = BroadlinkDevice_ImportCode($InstanceID, $command_name, $command);
 var_dump($result);
 ?>
 ```   
@@ -240,7 +240,7 @@ Parameter _$InstanceID_ __*ObjectID*__ from the Broadlink device instance
 _**Teaching**_
  
 ```php
-Broadlink_LearnDeviceCode($InstanceID, $command_name);
+BroadlinkDevice_LearnDeviceCode($InstanceID, $command_name);
 ```   
 
 Parameter _$command_name_ __*command name*__ under which the code is stored and then called again, e.g. _Power_
@@ -250,7 +250,7 @@ Parameter _$InstanceID_ __*ObjectID*__ from the Broadlink device instance
 _**Importing existing codes**_
 
 ```php
-Broadlink_ImportCode($InstanceID, $command_name, $command);
+BroadlinkDevice_ImportCode($InstanceID, $command_name, $command);
 ```   
 
 Parameter _$command_name_ __*command name*__ under which the code is stored and then called again, e.g. _Power_
