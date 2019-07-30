@@ -486,7 +486,7 @@ class BroadlinkDevice extends IPSModule
 
     protected function CreateMAC()
     {
-        $mac = implode(':', str_split(substr(md5(mt_rand()), 0, 12), 2));
+        $mac = implode(':', str_split(substr(md5(strval(mt_rand())), 0, 12), 2));
         return $mac;
     }
 
