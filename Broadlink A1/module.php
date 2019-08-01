@@ -25,24 +25,24 @@ class BroadlinkA1 extends IPSModule
         $this->RegisterVariableFloat('Temperature', 'Temperatur', '~Temperature');
         $this->RegisterVariableFloat('Humidity', 'Feuchtigkeit', '~Humidity.F');
         $lightass = [
-            [0, 'dunkel', 'Light', -1],
-            [1, 'gedimmt', 'Light', -1],
-            [2, 'normal', 'Light', -1],
-            [3, 'hell', 'Light', -1],
-            [4, 'unkown', 'Light', -1]
+            [0, $this->Translate('dark'), 'Light', -1],
+            [1, $this->Translate('dimmed'), 'Light', -1],
+            [2, $this->Translate('normal'), 'Light', -1],
+            [3, $this->Translate('light'), 'Light', -1],
+            [4, $this->Translate('unknown'), 'Light', -1]
         ];
         $airqualityass = [
-            [0, 'hervorragend', 'Factory', -1],
-            [1, 'gut', 'Factory', -1],
-            [2, 'normal', 'Factory', -1],
-            [3, 'schlecht', 'Factory', -1],
-            [4, 'unkown', 'Factory', -1]
+            [0, $this->Translate('excellent'), 'Factory', -1],
+            [1, $this->Translate('good'), 'Factory', -1],
+            [2, $this->Translate('normal'), 'Factory', -1],
+            [3, $this->Translate('bad'), 'Factory', -1],
+            [4, $this->Translate('unknown'), 'Factory', -1]
         ];
         $noiseass = [
-            [0, 'ruhig', 'Speaker', -1],
-            [1, 'normal', 'Speaker', -1],
-            [2, 'noisy', 'Speaker', -1],
-            [3, 'unkown', 'Speaker', -1]
+            [0, $this->Translate('quiet'), 'Speaker', -1],
+            [1, $this->Translate('normal'), 'Speaker', -1],
+            [2, $this->Translate('noisy'), 'Speaker', -1],
+            [3, $this->Translate('unknown'), 'Speaker', -1]
         ];
         $this->RegisterProfileAssociation('Broadlink.A1.Light', 'Light', '', '', 0, 4, 0, 0, 1, $lightass);
         $this->RegisterProfileAssociation('Broadlink.A1.Airquality', 'Factory', '', '', 0, 4, 0, 0, 1, $airqualityass);
