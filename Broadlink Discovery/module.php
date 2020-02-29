@@ -97,7 +97,7 @@ class BroadlinkDiscovery extends IPSModule
                         $instanceID = $ConfiguratorID;
                     }
                 }
-                if ($model == 'RM2' || $model == 'RM2 Pro Plus' || $model == 'RM2 Pro Plus2' || $model == 'RM2 Pro Plus3' || $model == 'RM Mini') {
+                if ($model == 'RM2' || $model == 'RM2 Pro Plus' || $model == 'RM2 Pro Plus2' || $model == 'RM2 Pro Plus3' || $model == 'RM Mini' || $model == 'RM Mini 3' || $model == 'RM Mini 4') {
                     $config_list[] = [
                         'instanceID'    => $instanceID,
                         'id'            => $device_id,
