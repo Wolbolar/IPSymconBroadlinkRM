@@ -220,7 +220,13 @@ class Broadlink
 			case 0x4EB5:
 				$type = "MP1";
 				break;
-			default:
+            case 0x62bc:
+                $type = "RM Mini 3";
+                break;
+            case 0x5f36:
+                $type = "RM Mini 4";
+                break;
+            default:
 				break;
 		}
 
@@ -303,6 +309,12 @@ class Broadlink
 			case 0x4EB5:
 				$type = 4;
 				break;
+            case 0x62bc:
+                $type = 2;
+                break;
+            case 0x5f36:
+                $type = 2;
+                break;
 			default:
 				break;
 		}
